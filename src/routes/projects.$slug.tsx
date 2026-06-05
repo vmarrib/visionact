@@ -1,3 +1,4 @@
+import type { ComponentType } from "react";
 import { createFileRoute, notFound, useRouter, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { projects } from "@/lib/projects";
@@ -5,7 +6,7 @@ import { MarketSentiment } from "@/components/projects/MarketSentiment";
 import { VisionGuard } from "@/components/projects/VisionGuard";
 import { Pitaia } from "@/components/projects/Pitaia";
 
-const content: Record<string, () => React.ReactElement> = {
+const content: Record<string, ComponentType> = {
   "market-sentiment": MarketSentiment,
   visionguard: VisionGuard,
   pitaia: Pitaia,
