@@ -287,13 +287,6 @@ def _melhor_match(emb: np.ndarray, galeria_modelo: Dict[str, np.ndarray],
 # ----------------------------------------------------------------------------
 # 8) FUNÇÃO 2 — ANÁLISE (recebe FOTOS e VÍDEOS) + RELATÓRIO
 # ----------------------------------------------------------------------------
-def _registrar_linha(linhas, arquivo, tipo, frame, n_rosto, galeria, embs):
-    """Para cada rosto detectado, roda os 3 modelos e registra 1 linha por modelo."""
-    for m in galeria.modelos:
-        # embs vem pré-computado por modelo para reaproveitar detecção quando possível;
-        # aqui cada modelo já forneceu sua própria lista de embeddings (ver loop chamador).
-        pass  # placeholder não usado (mantido por clareza)
-
 def analisar(pasta_analise: str, galeria: Galeria,
              thresholds: Dict[str, float] = THRESHOLDS,
              salvar_csv: str = ARQ_RELATORIO) -> pd.DataFrame:
