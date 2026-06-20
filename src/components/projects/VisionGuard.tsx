@@ -32,6 +32,17 @@ export function VisionGuard() {
         stack={stack}
       />
 
+      <Section label="Demo ao vivo" title="Reconhecimento facial no navegador">
+        <p className="mb-5 text-muted-foreground">
+          Cadastre pessoas conhecidas com fotos e depois envie imagens ou vídeos. O
+          reconhecimento roda 100% no seu navegador (nenhuma imagem sai do dispositivo) e
+          retorna se cada rosto é <strong>conhecido</strong> ou{" "}
+          <strong>não conhecido</strong>, com as variáveis usadas e a exatidão de cada modelo.
+        </p>
+        <VisionGuardDemo />
+      </Section>
+
+
       <Section label="Arquitetura" title="Da câmera ao alerta">
         <FlowDiagram
           steps={[
