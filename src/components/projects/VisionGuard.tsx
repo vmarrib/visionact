@@ -5,6 +5,7 @@ import { TechStack } from "@/components/TechStack";
 import { QA } from "@/components/QA";
 import { CodeBlock } from "@/components/CodeBlock";
 import { FeatureCards, BulletList } from "@/components/FeatureCards";
+import { VisionGuardDemo } from "@/components/projects/VisionGuardDemo";
 
 const stack = [
   "Python",
