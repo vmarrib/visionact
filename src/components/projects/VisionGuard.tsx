@@ -5,6 +5,7 @@ import { TechStack } from "@/components/TechStack";
 import { QA } from "@/components/QA";
 import { CodeBlock } from "@/components/CodeBlock";
 import { FeatureCards, BulletList } from "@/components/FeatureCards";
+import { VisionGuardDemo } from "@/components/projects/VisionGuardDemo";
 
 const stack = [
   "Python",
@@ -30,6 +31,17 @@ export function VisionGuard() {
         problem="Monitorar ambientes e identificar, em tempo real, pessoas conhecidas e desconhecidas — com notificação imediata dos eventos relevantes."
         stack={stack}
       />
+
+      <Section label="Demo ao vivo" title="Reconhecimento facial no navegador">
+        <p className="mb-5 text-muted-foreground">
+          Cadastre pessoas conhecidas com fotos e depois envie imagens ou vídeos. O
+          reconhecimento roda 100% no seu navegador (nenhuma imagem sai do dispositivo) e
+          retorna se cada rosto é <strong>conhecido</strong> ou{" "}
+          <strong>não conhecido</strong>, com as variáveis usadas e a exatidão de cada modelo.
+        </p>
+        <VisionGuardDemo />
+      </Section>
+
 
       <Section label="Arquitetura" title="Da câmera ao alerta">
         <FlowDiagram
