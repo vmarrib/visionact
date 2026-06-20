@@ -509,20 +509,20 @@ export function VisionGuardDemo() {
                 domain={[98.5, 100]}
                 tickFormatter={(v) => `${v}%`}
                 fontSize={11}
-                stroke="hsl(var(--muted-foreground))"
+                stroke="var(--muted-foreground)"
               />
               <YAxis
                 type="category"
                 dataKey="modelo"
                 width={130}
                 fontSize={11}
-                stroke="hsl(var(--muted-foreground))"
+                stroke="var(--muted-foreground)"
               />
               <Bar dataKey="acc" radius={[0, 4, 4, 0]}>
                 {MODEL_BENCH.map((m, i) => (
                   <Cell
                     key={i}
-                    fill={m.live ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"}
+                    fill={m.live ? "var(--primary)" : "var(--muted-foreground)"}
                     fillOpacity={m.live ? 1 : 0.45}
                   />
                 ))}
@@ -531,7 +531,7 @@ export function VisionGuardDemo() {
                   position="right"
                   formatter={(v: number) => `${v}%`}
                   fontSize={11}
-                  fill="hsl(var(--foreground))"
+                  fill="var(--foreground)"
                 />
               </Bar>
             </BarChart>
