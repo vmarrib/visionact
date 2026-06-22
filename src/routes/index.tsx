@@ -5,17 +5,17 @@ import { projects, profile } from "@/lib/projects";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vanessa M. Ribeiro — Engenheira & Cientista de Dados" },
+      { title: "Vanessa M. Ribeiro, Engenheira & Cientista de Dados" },
       {
         name: "description",
         content:
           "Portfólio de Vanessa M. Ribeiro: engenharia de dados, NLP, visão computacional e produtos guiados por IA. Três projetos detalhados de ponta a ponta.",
       },
-      { property: "og:title", content: "Vanessa M. Ribeiro — Engenheira & Cientista de Dados" },
+      { property: "og:title", content: "Vanessa M. Ribeiro, Engenheira & Cientista de Dados" },
       {
         property: "og:description",
         content:
-          "Engenharia de dados, NLP, visão computacional e produtos de IA — três projetos detalhados de ponta a ponta.",
+          "Engenharia de dados, NLP, visão computacional e produtos de IA, três projetos detalhados de ponta a ponta.",
       },
     ],
   }),

@@ -29,14 +29,14 @@ export function Pitaia() {
         name="PitaIA Digital Health Ecosystem"
         tagline="Saúde digital com IA clínica"
         domain="Product · Applied AI"
-        problem="Saúde mental precisa de acompanhamento contínuo e personalizado. O PitaIA combina check-in emocional, IA clínica e dados comportamentais consentidos — demonstrando visão de produto, não apenas código."
+        problem="Saúde mental precisa de acompanhamento contínuo e personalizado. O PitaIA combina check-in emocional, IA clínica e dados comportamentais consentidos, demonstrando visão de produto, não apenas código."
         stack={stack}
       />
 
       <Section label="Posicionamento" title="Pensamento de fundadora, não só engenharia">
         <p className="text-muted-foreground">
           Este é o projeto mais importante porque demonstra visão de produto. A
-          ideia não é só entregar features, mas estruturar um ecossistema —
+          ideia não é só entregar features, mas estruturar um ecossistema -
           documentação de visão, roadmap, design system e pesquisa de mercado
           tratados como parte do produto.
         </p>

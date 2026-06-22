@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/dialog";
 
 // =============================================================================
-// VisionGuard — Demo ao vivo (reconhecimento facial real no navegador)
+// VisionGuard, Demo ao vivo (reconhecimento facial real no navegador)
 // Usa @vladmandic/face-api (SSD MobileNet + Landmarks 68 + ResNet-34 embedding)
 // rodando 100% client-side. Pesos carregados via CDN.
 // =============================================================================
@@ -69,7 +69,7 @@ type AnalysisResult = {
   faces: DetectedFace[];
 };
 
-// Benchmark de acurácia (LFW) — referência pública dos modelos do pipeline.
+// Benchmark de acurácia (LFW), referência pública dos modelos do pipeline.
 const MODEL_BENCH = [
   { modelo: "dlib ResNet-29", acc: 99.38, live: false, dim: "128-d", metrica: "Euclidiana" },
   { modelo: "face-api ResNet-34", acc: 99.38, live: true, dim: "128-d", metrica: "Euclidiana" },

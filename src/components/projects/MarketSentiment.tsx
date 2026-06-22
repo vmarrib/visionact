@@ -27,7 +27,7 @@ export function MarketSentiment() {
         name="Market Sentiment Intelligence Platform"
         tagline="Inteligência de mercado com NLP"
         domain="Data Engineering · NLP"
-        problem="Empresas precisam entender rapidamente o que consumidores falam sobre produtos, marcas e concorrentes — em escala e em tempo quase real."
+        problem="Empresas precisam entender rapidamente o que consumidores falam sobre produtos, marcas e concorrentes, em escala e em tempo quase real."
         stack={stack}
       />
 

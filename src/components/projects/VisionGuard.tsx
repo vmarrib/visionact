@@ -28,7 +28,7 @@ export function VisionGuard() {
         name="VisionGuard AI"
         tagline="Reconhecimento facial em tempo real"
         domain="Computer Vision · MLOps"
-        problem="Monitorar ambientes e identificar, em tempo real, pessoas conhecidas e desconhecidas — com notificação imediata dos eventos relevantes."
+        problem="Monitorar ambientes e identificar, em tempo real, pessoas conhecidas e desconhecidas, com notificação imediata dos eventos relevantes."
         stack={stack}
       />
 
@@ -97,7 +97,7 @@ export function VisionGuard() {
 
       <Section label="Mensageria" title="Duas abordagens de entrega de eventos">
         <p className="mb-5 text-muted-foreground">
-          Mostro duas arquiteturas — porque a melhor escolha depende do contexto,
+          Mostro duas arquiteturas, porque a melhor escolha depende do contexto,
           e recrutadores valorizam quem entende os trade-offs.
         </p>
         <FeatureCards

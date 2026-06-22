@@ -49,7 +49,7 @@ export const profile = {
   name: "Vanessa M. Ribeiro",
   role: "Engenheira & Cientista de Dados",
   summary:
-    "Construo sistemas de dados de ponta a ponta — da coleta e infraestrutura ao machine learning em produção. Foco em arquiteturas escaláveis, NLP, visão computacional e produtos guiados por IA.",
+    "Construo sistemas de dados de ponta a ponta, da coleta e infraestrutura ao machine learning em produção. Foco em arquiteturas escaláveis, NLP, visão computacional e produtos guiados por IA.",
   email: "vanessa.ribeiro@example.com",
   github: "https://github.com/vanessaribeiro",
   linkedin: "https://linkedin.com/in/vanessaribeiro",
