@@ -2,7 +2,7 @@ import { ProjectHeader } from "@/components/ProjectHeader";
 import { Section } from "@/components/Section";
 import { FlowDiagram } from "@/components/FlowDiagram";
 import { TechStack } from "@/components/TechStack";
-import { QA } from "@/components/QA";
+
 import { CodeBlock } from "@/components/CodeBlock";
 import { FeatureCards, BulletList } from "@/components/FeatureCards";
 import { VisionGuardDemo } from "@/components/projects/VisionGuardDemo";
@@ -28,7 +28,7 @@ export function VisionGuard() {
         name="VisionGuard AI"
         tagline="Reconhecimento facial em tempo real"
         domain="Computer Vision · MLOps"
-        problem="Monitorar ambientes e identificar, em tempo real, pessoas conhecidas e desconhecidas — com notificação imediata dos eventos relevantes."
+        problem="Monitorar ambientes e identificar, em tempo real, pessoas conhecidas e desconhecidas, com notificação imediata dos eventos relevantes."
         stack={stack}
       />
 
@@ -97,7 +97,7 @@ export function VisionGuard() {
 
       <Section label="Mensageria" title="Duas abordagens de entrega de eventos">
         <p className="mb-5 text-muted-foreground">
-          Mostro duas arquiteturas — porque a melhor escolha depende do contexto,
+          Mostro duas arquiteturas, porque a melhor escolha depende do contexto,
           e recrutadores valorizam quem entende os trade-offs.
         </p>
         <FeatureCards
@@ -126,17 +126,32 @@ export function VisionGuard() {
         />
       </Section>
 
-      <Section label="Entrevista" title="Decisões técnicas que defendo">
-        <QA
-          area="Computer Vision"
-          question="Como evitar falsos positivos?"
-          answers={[
-            "Threshold de similaridade calibrado",
-            "Múltiplas imagens por pessoa",
-            "Ensemble de embeddings",
+      <Section label="Fundamentação técnica" title="Decisões de arquitetura documentadas">
+        <FeatureCards
+          features={[
+            {
+              title: "Controle de falsos positivos",
+              body: (
+                <p>
+                  Threshold de similaridade calibrado, múltiplas imagens por
+                  pessoa e ensemble de embeddings reduzem confusões entre
+                  rostos parecidos.
+                </p>
+              ),
+            },
+            {
+              title: "Busca vetorial em tempo real",
+              body: (
+                <p>
+                  Embeddings indexados em banco vetorial permitem busca por
+                  similaridade em milissegundos, mesmo com galerias grandes.
+                </p>
+              ),
+            },
           ]}
         />
       </Section>
+
     </>
   );
 }

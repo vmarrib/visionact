@@ -5,11 +5,13 @@ import { projects } from "@/lib/projects";
 import { MarketSentiment } from "@/components/projects/MarketSentiment";
 import { VisionGuard } from "@/components/projects/VisionGuard";
 import { Pitaia } from "@/components/projects/Pitaia";
+import { ComplianceRisk } from "@/components/projects/ComplianceRisk";
 
 const content: Record<string, ComponentType> = {
   "market-sentiment": MarketSentiment,
   visionguard: VisionGuard,
   pitaia: Pitaia,
+  "compliance-risk": ComplianceRisk,
 };
 
 export const Route = createFileRoute("/projects/$slug")({
@@ -21,7 +23,7 @@ export const Route = createFileRoute("/projects/$slug")({
   head: ({ loaderData }) => {
     const p = loaderData?.project;
     if (!p) return {};
-    const title = `${p.name} — Vanessa M. Ribeiro`;
+    const title = `${p.name}, Vanessa M. Ribeiro`;
     return {
       meta: [
         { title },
