@@ -126,17 +126,32 @@ export function VisionGuard() {
         />
       </Section>
 
-      <Section label="Entrevista" title="Decisões técnicas que defendo">
-        <QA
-          area="Computer Vision"
-          question="Como evitar falsos positivos?"
-          answers={[
-            "Threshold de similaridade calibrado",
-            "Múltiplas imagens por pessoa",
-            "Ensemble de embeddings",
+      <Section label="Fundamentação técnica" title="Decisões de arquitetura documentadas">
+        <FeatureCards
+          features={[
+            {
+              title: "Controle de falsos positivos",
+              body: (
+                <p>
+                  Threshold de similaridade calibrado, múltiplas imagens por
+                  pessoa e ensemble de embeddings reduzem confusões entre
+                  rostos parecidos.
+                </p>
+              ),
+            },
+            {
+              title: "Busca vetorial em tempo real",
+              body: (
+                <p>
+                  Embeddings indexados em banco vetorial permitem busca por
+                  similaridade em milissegundos, mesmo com galerias grandes.
+                </p>
+              ),
+            },
           ]}
         />
       </Section>
+
     </>
   );
 }
