@@ -124,25 +124,42 @@ export function MarketSentiment() {
         />
       </Section>
 
-      <Section label="Entrevista" title="Decisões técnicas que defendo">
-        <div className="grid gap-4">
-          <QA
-            area="Engenharia"
-            question="Como você escalaria o crawler?"
-            answers={["Filas Kafka", "Paralelismo", "Controle de rate limiting"]}
-          />
-          <QA
-            area="Dados"
-            question="Como tratou comentários duplicados?"
-            answers={["Hash MD5 por comentário", "Deduplicação na camada de ETL"]}
-          />
-          <QA
-            area="Machine Learning"
-            question="Por que usou BERT ao invés de TF-IDF?"
-            answers={["Melhor captura de contexto semântico nas avaliações"]}
-          />
-        </div>
+      <Section label="Fundamentação técnica" title="Decisões de arquitetura documentadas">
+        <FeatureCards
+          features={[
+            {
+              title: "Escalabilidade do crawler",
+              body: (
+                <p>
+                  Filas Kafka, paralelismo de workers e controle de rate
+                  limiting desacoplam coleta de processamento e absorvem picos
+                  sem perder dados.
+                </p>
+              ),
+            },
+            {
+              title: "Deduplicação de comentários",
+              body: (
+                <p>
+                  Hash MD5 por comentário na camada de ETL garante
+                  idempotência e evita reprocessar avaliações repetidas.
+                </p>
+              ),
+            },
+            {
+              title: "BERT em vez de TF-IDF",
+              body: (
+                <p>
+                  Modelos transformer capturam contexto semântico das
+                  avaliações, reduzindo erro de classificação em frases com
+                  ironia e negação.
+                </p>
+              ),
+            },
+          ]}
+        />
       </Section>
+
     </>
   );
 }
