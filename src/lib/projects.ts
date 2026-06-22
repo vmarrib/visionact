@@ -43,14 +43,25 @@ export const projects: ProjectMeta[] = [
     stack: ["React", "Supabase", "Edge Functions", "OpenAI", "PostgreSQL"],
     accent: "Founder mindset",
   },
+  {
+    slug: "compliance-risk",
+    index: "04",
+    name: "Compliance Risk Intelligence",
+    tagline: "Análise de risco de compliance (KYC/KYE/KYS/KYP)",
+    description:
+      "Motor de risco que orquestra múltiplos bureaus nacionais e internacionais, valida CPF e CNPJ e calcula score de risco para due diligence de compliance com trilha de auditoria.",
+    domain: "Risk · Compliance · Data",
+    stack: ["Python", "FastAPI", "Pydantic", "PostgreSQL", "Airflow", "Redis"],
+    accent: "Regulatory grade",
+  },
 ];
 
 export const profile = {
   name: "Vanessa M. Ribeiro",
   role: "Engenheira & Cientista de Dados",
   summary:
-    "Construo sistemas de dados de ponta a ponta, da coleta e infraestrutura ao machine learning em produção. Foco em arquiteturas escaláveis, NLP, visão computacional e produtos guiados por IA.",
+    "Construo sistemas de dados de ponta a ponta, da coleta e infraestrutura ao machine learning em produção. Foco em arquiteturas escaláveis, NLP, visão computacional, risco de compliance e produtos guiados por IA.",
   email: "vanessa.ribeiro@example.com",
-  github: "https://github.com/vanessaribeiro",
-  linkedin: "https://linkedin.com/in/vanessaribeiro",
+  github: "https://github.com/vanessamarrib",
+  linkedin: "https://www.linkedin.com/in/vanessamarrib/",
 };
