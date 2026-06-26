@@ -14,11 +14,11 @@ export const projects: ProjectMeta[] = [
     slug: "market-sentiment",
     index: "01",
     name: "Market Sentiment Intelligence Platform",
-    tagline: "Inteligência de mercado com NLP",
+    tagline: "Análise de sentimento de reviews por link",
     description:
-      "Crawler distribuído + pipeline de NLP que transforma milhares de avaliações de e-commerce em sentimento, reclamações, elogios e resumo executivo.",
+      "Cole o link de um produto: o scraper varre todas as opiniões e estrelas, um modelo de sentimento classifica cada comentário e o sistema gera um relatório quantitativo (estrelas, % de sentimento, elogios e reclamações).",
     domain: "Data Engineering · NLP",
-    stack: ["Python", "Scrapy", "Kafka", "PostgreSQL", "Airflow", "Transformers"],
+    stack: ["Python", "Playwright", "FastAPI", "Transformers", "Docker"],
     accent: "Market intelligence",
   },
   {
