@@ -90,25 +90,33 @@ function lexiconScore(text: string): number {
 export function classifyReview(review: ReviewInput): ClassifiedReview {
   const text = (review.text || "").trim();
   const rating = typeof review.rating === "number" ? review.rating : null;
-  let score = lexiconScore(text);
+  const textScore = lexiconScore(text);
+  const hasText = text.length > 0;
 
-  // Blend in the star signal when available (strong prior).
+  // Combine the text signal with the star signal. Centered star signal:
+  // 5★ -> +2, 4★ -> +1, 3★ -> 0, 2★ -> -1, 1★ -> -2.
+  // When the comment has text, stars act as a lighter prior so the words
+  // dominate; with no text, stars carry the whole decision.
+  let score = textScore;
   if (rating != null) {
-    if (rating >= 4) score += 2;
-    else if (rating <= 2) score -= 2;
+    const starSignal = rating - 3;
+    score += hasText ? starSignal * 0.8 : starSignal * 1.7;
   }
 
-  // If no text signal at all, fall back to stars only.
-  if (!text && rating != null) {
-    score = rating >= 4 ? 2 : rating <= 2 ? -2 : 0;
+  // Conflict guard: a clearly negative text on a high star rating (or the
+  // reverse) usually means the text is the real opinion — trust it more.
+  if (hasText && rating != null) {
+    if (textScore <= -2 && rating >= 4) score = textScore + 0.5;
+    else if (textScore >= 2 && rating <= 2) score = textScore - 0.5;
   }
 
   let sentiment: Sentiment = "neutro";
-  if (score >= 1) sentiment = "positivo";
-  else if (score <= -1) sentiment = "negativo";
+  if (score >= 0.8) sentiment = "positivo";
+  else if (score <= -0.8) sentiment = "negativo";
 
   return { text, rating, sentiment, score: Math.round(score * 100) / 100 };
 }
+
 
 function topKeywords(
   reviews: ClassifiedReview[],
