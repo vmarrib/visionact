@@ -36,13 +36,15 @@ export function MarketSentiment() {
       <Section label="Demo ao vivo" title="Cole o link e veja o resultado na hora">
         <p className="mb-5 text-muted-foreground">
           Cole o link de um produto (ex.: Mercado Livre) e o sistema varre as{" "}
-          <strong>opiniões e estrelas</strong>, classifica cada comentário com um{" "}
-          <strong>modelo de sentimento PT-BR</strong> e devolve um{" "}
-          <strong>relatório quantitativo</strong> em segundos — nota média,
-          distribuição de estrelas, % de sentimento e principais elogios e
-          reclamações.
+          <strong>opiniões e estrelas</strong>, lê as{" "}
+          <strong>características do produto</strong>, classifica cada comentário com
+          um <strong>modelo de sentimento PT-BR</strong> e devolve um{" "}
+          <strong>relatório quantitativo e qualitativo</strong> em segundos. Use o
+          modo <strong>comparar 2</strong> para colar dois links e ver lado a lado
+          qual produto tem a melhor avaliação.
         </p>
         <MarketSentimentDemo />
+
         <div className="mt-4 flex flex-wrap gap-3">
           <a
             href={REPO_URL}
