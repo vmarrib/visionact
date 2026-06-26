@@ -204,116 +204,178 @@ export function MarketSentimentDemo() {
 
 /* ------------------------------- Comparison ------------------------------- */
 
+function recommendScore(r: SentimentReport): number {
+  // 0–100 score blending approval, average rating and volume confidence.
+  const approval = r.sentimentPct.positivo - r.sentimentPct.negativo; // -100..100
+  const ratingPart = ((r.averageRating ?? 3) / 5) * 100; // 0..100
+  const confidence = Math.min(1, r.totalReviews / 30); // more reviews = steadier
+  const raw = (approval + 100) / 2 * 0.5 + ratingPart * 0.5;
+  return Math.round(raw * (0.7 + 0.3 * confidence));
+}
+
 function Comparison({ a, b }: { a: Loaded; b: Loaded }) {
   const ra = a.report;
   const rb = b.report;
 
-  const winner =
-    ra.sentimentPct.positivo === rb.sentimentPct.positivo
-      ? null
-      : ra.sentimentPct.positivo > rb.sentimentPct.positivo
-        ? "a"
-        : "b";
+  const scoreA = recommendScore(ra);
+  const scoreB = recommendScore(rb);
+  const winner = scoreA === scoreB ? null : scoreA > scoreB ? "a" : "b";
+  const win = winner === "a" ? ra : winner === "b" ? rb : null;
+  const lose = winner === "a" ? rb : winner === "b" ? ra : null;
 
   return (
     <div className="mt-6 space-y-6 border-t border-border pt-5">
-      {/* Verdict */}
-      <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
-        <p className="mb-1 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          Veredito
+      {/* Recommendation banner */}
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-5">
+        <p className="mb-2 font-mono text-xs uppercase tracking-widest text-primary">
+          Recomendação
         </p>
-        <p className="text-sm leading-relaxed text-foreground">
-          {winner === null ? (
-            <>Os dois produtos têm o mesmo nível de aprovação ({ra.sentimentPct.positivo}% positivo).</>
-          ) : (
-            <>
-              <strong>{(winner === "a" ? ra : rb).productName}</strong> sai na
-              frente com{" "}
-              <strong>
-                {(winner === "a" ? ra : rb).sentimentPct.positivo}% de opiniões
-                positivas
-              </strong>{" "}
-              contra {(winner === "a" ? rb : ra).sentimentPct.positivo}% do outro.
-            </>
-          )}
-        </p>
+        {win && lose ? (
+          <p className="text-base leading-relaxed text-foreground">
+            👉 Melhor escolha: <strong>{win.productName}</strong>. Tem score{" "}
+            <strong>{winner === "a" ? scoreA : scoreB}/100</strong> contra{" "}
+            {winner === "a" ? scoreB : scoreA}/100 — somando aprovação, nota média
+            e volume de opiniões.
+          </p>
+        ) : (
+          <p className="text-base leading-relaxed text-foreground">
+            Empate técnico: os dois produtos têm score {scoreA}/100.
+          </p>
+        )}
       </div>
 
-      {/* Metric comparison rows */}
-      <div className="overflow-hidden rounded-lg border border-border">
-        <div className="grid grid-cols-3 bg-secondary/50 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-          <div className="p-3">Métrica</div>
-          <div className="truncate p-3 text-foreground" title={ra.productName}>
-            {ra.productName}
-          </div>
-          <div className="truncate p-3 text-foreground" title={rb.productName}>
-            {rb.productName}
-          </div>
-        </div>
-        <CompareRow
+      {/* Score cards */}
+      <div className="grid grid-cols-2 gap-3">
+        <ScoreCard report={ra} score={scoreA} isWinner={winner === "a"} />
+        <ScoreCard report={rb} score={scoreB} isWinner={winner === "b"} />
+      </div>
+
+      {/* Head-to-head metric bars */}
+      <div className="space-y-4 rounded-lg border border-border bg-background p-4">
+        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          Comparação direta
+        </p>
+        <Versus
           label="Nota média"
-          va={ra.averageRating != null ? `${ra.averageRating}★` : "—"}
-          vb={rb.averageRating != null ? `${rb.averageRating}★` : "—"}
-          winA={(ra.averageRating ?? 0) > (rb.averageRating ?? 0)}
-          winB={(rb.averageRating ?? 0) > (ra.averageRating ?? 0)}
+          a={ra.averageRating ?? 0}
+          b={rb.averageRating ?? 0}
+          max={5}
+          fmt={(v) => `${v ? v.toFixed(1) : "—"}★`}
         />
-        <CompareRow
-          label="Opiniões"
-          va={String(ra.totalReviews)}
-          vb={String(rb.totalReviews)}
-          winA={ra.totalReviews > rb.totalReviews}
-          winB={rb.totalReviews > ra.totalReviews}
-        />
-        <CompareRow
+        <Versus
           label="% Positivas"
-          va={`${ra.sentimentPct.positivo}%`}
-          vb={`${rb.sentimentPct.positivo}%`}
-          winA={ra.sentimentPct.positivo > rb.sentimentPct.positivo}
-          winB={rb.sentimentPct.positivo > ra.sentimentPct.positivo}
+          a={ra.sentimentPct.positivo}
+          b={rb.sentimentPct.positivo}
+          max={100}
+          fmt={(v) => `${v}%`}
         />
-        <CompareRow
+        <Versus
           label="% Negativas"
-          va={`${ra.sentimentPct.negativo}%`}
-          vb={`${rb.sentimentPct.negativo}%`}
-          winA={ra.sentimentPct.negativo < rb.sentimentPct.negativo}
-          winB={rb.sentimentPct.negativo < ra.sentimentPct.negativo}
+          a={ra.sentimentPct.negativo}
+          b={rb.sentimentPct.negativo}
+          max={100}
+          fmt={(v) => `${v}%`}
+          lowerIsBetter
         />
+        <Versus
+          label="Opiniões"
+          a={ra.totalReviews}
+          b={rb.totalReviews}
+          max={Math.max(ra.totalReviews, rb.totalReviews, 1)}
+          fmt={(v) => String(v)}
+        />
+        <div className="flex justify-between pt-1 font-mono text-[11px] text-muted-foreground">
+          <span className="max-w-[45%] truncate text-positive">A · {ra.productName}</span>
+          <span className="max-w-[45%] truncate text-right text-primary">B · {rb.productName}</span>
+        </div>
       </div>
 
       {/* Side-by-side reports */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <Report report={ra} sourceUrl={a.sourceUrl} compact />
-        <Report report={rb} sourceUrl={b.sourceUrl} compact />
+        <Report report={ra} sourceUrl={a.sourceUrl} compact badge="A" />
+        <Report report={rb} sourceUrl={b.sourceUrl} compact badge="B" />
       </div>
     </div>
   );
 }
 
-function CompareRow({
-  label,
-  va,
-  vb,
-  winA,
-  winB,
+function ScoreCard({
+  report,
+  score,
+  isWinner,
 }: {
-  label: string;
-  va: string;
-  vb: string;
-  winA: boolean;
-  winB: boolean;
+  report: SentimentReport;
+  score: number;
+  isWinner: boolean;
 }) {
   return (
-    <div className="grid grid-cols-3 border-t border-border text-sm">
-      <div className="p-3 font-mono text-xs text-muted-foreground">{label}</div>
-      <div className={`p-3 font-semibold ${winA ? "text-positive" : "text-foreground"}`}>
-        {va} {winA && "✓"}
+    <div
+      className={`relative rounded-xl border p-4 ${
+        isWinner ? "border-positive/50 bg-positive/5" : "border-border bg-background"
+      }`}
+    >
+      {isWinner && (
+        <span className="absolute right-3 top-3 rounded-full bg-positive/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-positive">
+          ★ vencedor
+        </span>
+      )}
+      <p className="line-clamp-2 pr-16 text-sm font-semibold text-foreground" title={report.productName}>
+        {report.productName}
+      </p>
+      <p className="mt-3 text-3xl font-bold tracking-tight text-foreground">
+        {score}
+        <span className="text-base font-normal text-muted-foreground">/100</span>
+      </p>
+      <p className="mt-1 font-mono text-xs text-muted-foreground">
+        {report.sentimentPct.positivo}% positivo ·{" "}
+        {report.averageRating != null ? `${report.averageRating}★` : "sem nota"}
+      </p>
+    </div>
+  );
+}
+
+function Versus({
+  label,
+  a,
+  b,
+  max,
+  fmt,
+  lowerIsBetter = false,
+}: {
+  label: string;
+  a: number;
+  b: number;
+  max: number;
+  fmt: (v: number) => string;
+  lowerIsBetter?: boolean;
+}) {
+  const aWins = lowerIsBetter ? a < b : a > b;
+  const bWins = lowerIsBetter ? b < a : b > a;
+  const pa = max > 0 ? Math.min(100, (a / max) * 100) : 0;
+  const pb = max > 0 ? Math.min(100, (b / max) * 100) : 0;
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between font-mono text-xs">
+        <span className={aWins ? "font-semibold text-positive" : "text-muted-foreground"}>
+          {fmt(a)}
+        </span>
+        <span className="text-muted-foreground">{label}</span>
+        <span className={bWins ? "font-semibold text-primary" : "text-muted-foreground"}>
+          {fmt(b)}
+        </span>
       </div>
-      <div className={`p-3 font-semibold ${winB ? "text-positive" : "text-foreground"}`}>
-        {vb} {winB && "✓"}
+      <div className="flex items-center gap-1">
+        <div className="flex h-2 flex-1 justify-end overflow-hidden rounded-full bg-secondary">
+          <div className="h-full rounded-full bg-positive transition-all" style={{ width: `${pa}%` }} />
+        </div>
+        <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pb}%` }} />
+        </div>
       </div>
     </div>
   );
 }
+
 
 /* --------------------------------- Report --------------------------------- */
 
