@@ -210,6 +210,9 @@ export function buildReport(
     .slice(0, 6)
     .map((r) => ({ text: r.text, rating: r.rating, sentiment: r.sentiment }));
 
+  const praise = topKeywords(positiveReviews, POSITIVE);
+  const complaints = topKeywords(negativeReviews, NEGATIVE);
+
   return {
     productName,
     totalReviews: classified.length,
@@ -218,8 +221,20 @@ export function buildReport(
     starDistribution: [5, 4, 3, 2, 1].map((s) => ({ star: s, count: star[s] })),
     sentiment: counts,
     sentimentPct: pct,
-    praise: topKeywords(positiveReviews, POSITIVE),
-    complaints: topKeywords(negativeReviews, NEGATIVE),
+    praise,
+    complaints,
+    attributes: attributes
+      .filter((a) => a && a.label && a.value)
+      .slice(0, 8)
+      .map((a) => ({ label: String(a.label).trim(), value: String(a.value).trim() })),
+    qualitativeSummary: buildQualitativeSummary(
+      productName,
+      classified.length,
+      average,
+      pct,
+      praise,
+      complaints,
+    ),
     sample,
   };
 }
