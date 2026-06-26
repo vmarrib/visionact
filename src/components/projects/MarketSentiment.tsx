@@ -154,33 +154,35 @@ Reclamações: defeito, caro, esquentando`}
         </div>
       </Section>
 
-      <Section label="Features avançadas" title="Além da classificação básica">
+      <Section label="Modelo de sentimento" title="Dois backends plugáveis">
         <FeatureCards
           features={[
             {
-              title: "Topic Modeling",
+              title: "Léxico PT-BR (padrão)",
               body: (
                 <>
-                  <p className="mb-2">Descobre automaticamente os temas recorrentes:</p>
+                  <p className="mb-2">
+                    Baseline transparente e auditável, sem download de modelos:
+                  </p>
                   <BulletList
                     items={[
-                      "Problemas de bateria",
-                      "Entrega",
-                      "Qualidade",
-                      "Atendimento",
+                      "Dicionário ponderado (-3 a +3)",
+                      "Trata negação: \u201cnão recomendo\u201d",
+                      "Trata intensificadores: \u201cmuito bom\u201d",
+                      "Estrelas como sinal quando não há texto",
                     ]}
                   />
                 </>
               ),
             },
             {
-              title: "Resumo executivo com LLM",
+              title: "Transformer (opcional)",
               body: (
-                <div className="rounded-md border border-border bg-surface p-3 font-mono text-xs leading-relaxed text-surface-foreground">
-                  Foram analisados 45.000 comentários. 73% apresentam sentimento
-                  positivo. Os principais problemas relatados foram atraso na
-                  entrega e baixa durabilidade.
-                </div>
+                <p>
+                  Modelo HuggingFace multilíngue para maior cobertura semântica
+                  (ironia, contexto), ativável por variável de ambiente quando há
+                  GPU disponível.
+                </p>
               ),
             },
           ]}
@@ -191,37 +193,39 @@ Reclamações: defeito, caro, esquentando`}
         <FeatureCards
           features={[
             {
-              title: "Escalabilidade do crawler",
+              title: "Navegador real, não requests",
               body: (
                 <p>
-                  Filas Kafka, paralelismo de workers e controle de rate
-                  limiting desacoplam coleta de processamento e absorvem picos
-                  sem perder dados.
+                  O marketplace renderiza opiniões e estrelas via JavaScript e
+                  bloqueia tráfego de datacenter. O Playwright executa o JS,
+                  mantém sessão e fecha modais como um usuário.
                 </p>
               ),
             },
             {
-              title: "Deduplicação de comentários",
+              title: "Coleta completa de opiniões",
               body: (
                 <p>
-                  Hash MD5 por comentário na camada de ETL garante
-                  idempotência e evita reprocessar avaliações repetidas.
+                  Abre o modal \u201cMostrar todas as opiniões\u201d e pagina/rola
+                  até esgotar, deduplicando por prefixo do texto para não contar
+                  o mesmo comentário duas vezes.
                 </p>
               ),
             },
             {
-              title: "BERT em vez de TF-IDF",
+              title: "Backend de sentimento plugável",
               body: (
                 <p>
-                  Modelos transformer capturam contexto semântico das
-                  avaliações, reduzindo erro de classificação em frases com
-                  ironia e negação.
+                  Baseline léxico reprodutível por padrão e transformer quando há
+                  necessidade de cobertura semântica, sem alterar o resto do
+                  pipeline.
                 </p>
               ),
             },
           ]}
         />
       </Section>
+
 
     </>
   );
