@@ -63,14 +63,8 @@ export function MarketSentiment() {
             </svg>
             ver projeto no GitHub
           </a>
-          <a
-            href="/market-sentiment-ai.zip"
-            download
-            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-mono text-sm text-foreground transition-colors hover:bg-secondary"
-          >
-            ↓ baixar código (.zip)
-          </a>
         </div>
+
       </Section>
 
       <Section label="O que faz" title="Da coleta ao relatório">
