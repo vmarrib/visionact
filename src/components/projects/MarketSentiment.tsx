@@ -106,76 +106,7 @@ export function MarketSentiment() {
         />
       </Section>
 
-      <Section label="Projeto no GitHub" title="Pronto para clonar e importar">
-        <p className="mb-3 text-muted-foreground">
-          Pacote Python instalável, com CLI (cola o link), API FastAPI,
-          Dockerfile, CI no GitHub Actions, testes e um relatório de exemplo.
-        </p>
-        <CodeBlock
-          filename="market-sentiment/"
-          code={`market-sentiment
-├── README.md
-├── pyproject.toml
-├── requirements.txt
-├── Dockerfile
-├── .github/workflows/ci.yml
-├── market_sentiment
-│   ├── cli.py            # python -m market_sentiment <url>
-│   ├── api.py            # POST /analisar
-│   ├── config.py
-│   ├── models.py         # contratos de dados
-│   ├── scraper           # Playwright: opiniões + estrelas + características
-│   ├── sentiment         # léxico PT-BR ou transformer
-│   └── report            # JSON · Markdown · CSV
-├── tests
-└── examples              # relatório real da JBL Boombox 3`}
-        />
-        <div className="mt-4 flex flex-wrap gap-3">
-          <a
-            href={REPO_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2 font-mono text-sm text-background transition-opacity hover:opacity-90"
-          >
-            ver repositório no GitHub →
-          </a>
-          <a
-            href="/market-sentiment-ai.zip"
-            download
-            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-mono text-sm text-foreground transition-colors hover:bg-secondary"
-          >
-            ↓ baixar projeto completo (.zip)
-          </a>
-          <a
-            href="/mercadolivre_crawler_colab.py"
-            download
-            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-mono text-sm text-foreground transition-colors hover:bg-secondary"
-          >
-            ↓ baixar coletor (.py)
-          </a>
-        </div>
-      </Section>
 
-      <Section label="Como usar" title="Da CLI ao relatório">
-        <CodeBlock
-          filename="terminal"
-          code={`pip install -r requirements.txt
-playwright install chromium
-
-python -m market_sentiment \\
-  "https://www.mercadolivre.com.br/.../p/MLB46273431"`}
-        />
-        <p className="mt-4 mb-2 text-muted-foreground">
-          Saída do relatório (resumo):
-        </p>
-        <CodeBlock
-          code={`Comentários coletados: 12  |  com estrelas: 12
-Estrelas: 5★ 7 · 4★ 2 · 3★ 0 · 2★ 2 · 1★ 1   (média 4.0)
-Sentimento: positivo 75% · neutro 0% · negativo 25%
-Elogios:    potente, qualidade, recomendo
-Reclamações: defeito, caro, esquentando`}
-        />
-      </Section>
 
       <Section label="Arquitetura" title="Pipeline ponta a ponta">
         <FlowDiagram
