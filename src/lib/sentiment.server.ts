@@ -4,28 +4,37 @@
 
 const POSITIVE: Record<string, number> = {
   bom: 2, boa: 2, otimo: 3, otima: 3, ótimo: 3, ótima: 3, excelente: 3,
-  maravilhoso: 3, maravilhosa: 3, perfeito: 3, perfeita: 3, incrivel: 3,
-  incrível: 3, sensacional: 3, espetacular: 3, recomendo: 3, recomendado: 2,
-  adorei: 3, amei: 3, gostei: 2, satisfeito: 2, satisfeita: 2, top: 2,
-  qualidade: 2, durável: 2, duravel: 2, rapido: 1, rápido: 1, potente: 2,
-  lindo: 2, linda: 2, vale: 2, valeu: 2, funciona: 1, atende: 1, bonito: 2,
-  bonita: 2, confortável: 2, confortavel: 2, eficiente: 2, barato: 1,
-  superou: 3, surpreendeu: 2, melhor: 2, agil: 1, ágil: 1, robusto: 2,
-  caprichado: 2, otimo_custo: 2, recomendadissimo: 3, sucesso: 2, feliz: 2,
+  maravilhoso: 3, maravilhosa: 3, maravilha: 3, perfeito: 3, perfeita: 3,
+  perfeitamente: 3, incrivel: 3, incrível: 3, sensacional: 3, espetacular: 3,
+  fantastico: 3, fantástico: 3, recomendo: 3, recomendado: 2, recomendadissimo: 3,
+  recomendadíssimo: 3, indico: 2, indicado: 2, aprovado: 2, adorei: 3, amei: 3,
+  gostei: 2, satisfeito: 2, satisfeita: 2, top: 2, show: 2, qualidade: 2,
+  durável: 2, duravel: 2, resistente: 2, rapido: 1, rápida: 1, rápido: 1,
+  potente: 2, lindo: 2, linda: 2, bonito: 2, bonita: 2, vale: 2, valeu: 2,
+  funciona: 1, funcionou: 2, funcionando: 1, cumpre: 1, atende: 1, atendeu: 1,
+  confortável: 2, confortavel: 2, eficiente: 2, barato: 1, superou: 3,
+  surpreendeu: 2, surpreendente: 2, melhor: 2, agil: 1, ágil: 1, robusto: 2,
+  caprichado: 2, sucesso: 2, feliz: 2, otimo_custo: 2, presente: 1,
+  impecavel: 3, impecável: 3, otimos: 3, ótimos: 3, lindo_demais: 3, nota: 1,
 };
 
 const NEGATIVE: Record<string, number> = {
   ruim: 2, pessimo: 3, péssimo: 3, pessima: 3, péssima: 3, horrivel: 3,
-  horrível: 3, terrivel: 3, terrível: 3, defeito: 3, defeituoso: 3, quebrou: 3,
-  quebrado: 3, falha: 2, falhou: 2, problema: 2, problemas: 2, lento: 2,
-  demora: 2, demorou: 2, decepcao: 3, decepção: 3, decepcionado: 3,
-  decepcionante: 3, fraco: 2, fraca: 2, caro: 1, careiro: 2, arrependido: 3,
-  arrependida: 3, arrependimento: 3, devolvi: 3, devolução: 2, devolucao: 2,
-  estragou: 3, parou: 2, esquentando: 2, esquenta: 2, frágil: 2, fragil: 2,
-  enganacao: 3, enganação: 3, golpe: 3, propaganda_enganosa: 3, nao_funciona: 3,
+  horrível: 3, horroroso: 3, terrivel: 3, terrível: 3, lixo: 3, porcaria: 3,
+  defeito: 3, defeituoso: 3, quebrou: 3, quebrado: 3, estragou: 3, estragado: 3,
+  falha: 2, falhou: 2, falhando: 2, problema: 2, problemas: 2, lento: 2,
+  lenta: 2, demora: 2, demorou: 2, demorado: 2, atrasou: 2, atraso: 2,
+  atrasado: 2, decepcao: 3, decepção: 3, decepcionado: 3, decepcionante: 3,
+  fraco: 2, fraca: 2, caro: 1, careiro: 2, arrependido: 3, arrependida: 3,
+  arrependimento: 3, devolvi: 3, devolução: 2, devolucao: 2, parou: 2,
+  esquentando: 2, esquenta: 2, superaquece: 2, trava: 2, travando: 2,
+  barulho: 1, frágil: 2, fragil: 2, enganacao: 3, enganação: 3, golpe: 3,
   inutil: 3, inútil: 3, pior: 2, odiei: 3, detestei: 3, vagabundo: 3,
-  vazou: 2, riscado: 2, amassado: 2, atrasou: 2, atraso: 2,
+  vazou: 2, riscado: 2, amassado: 2, errado: 2, faltando: 2, incompleto: 2,
+  rasgado: 2, manchado: 2, sujo: 2, usado: 1, falso: 3, pirata: 3,
+  nao_funciona: 3, propaganda_enganosa: 3,
 };
+
 
 const NEGATIONS = new Set([
   "nao", "não", "nunca", "jamais", "nem", "sem", "nenhum", "nenhum", "nenhuma",
@@ -81,25 +90,33 @@ function lexiconScore(text: string): number {
 export function classifyReview(review: ReviewInput): ClassifiedReview {
   const text = (review.text || "").trim();
   const rating = typeof review.rating === "number" ? review.rating : null;
-  let score = lexiconScore(text);
+  const textScore = lexiconScore(text);
+  const hasText = text.length > 0;
 
-  // Blend in the star signal when available (strong prior).
+  // Combine the text signal with the star signal. Centered star signal:
+  // 5★ -> +2, 4★ -> +1, 3★ -> 0, 2★ -> -1, 1★ -> -2.
+  // When the comment has text, stars act as a lighter prior so the words
+  // dominate; with no text, stars carry the whole decision.
+  let score = textScore;
   if (rating != null) {
-    if (rating >= 4) score += 2;
-    else if (rating <= 2) score -= 2;
+    const starSignal = rating - 3;
+    score += hasText ? starSignal * 0.8 : starSignal * 1.7;
   }
 
-  // If no text signal at all, fall back to stars only.
-  if (!text && rating != null) {
-    score = rating >= 4 ? 2 : rating <= 2 ? -2 : 0;
+  // Conflict guard: a clearly negative text on a high star rating (or the
+  // reverse) usually means the text is the real opinion — trust it more.
+  if (hasText && rating != null) {
+    if (textScore <= -2 && rating >= 4) score = textScore + 0.5;
+    else if (textScore >= 2 && rating <= 2) score = textScore - 0.5;
   }
 
   let sentiment: Sentiment = "neutro";
-  if (score >= 1) sentiment = "positivo";
-  else if (score <= -1) sentiment = "negativo";
+  if (score >= 0.8) sentiment = "positivo";
+  else if (score <= -0.8) sentiment = "negativo";
 
   return { text, rating, sentiment, score: Math.round(score * 100) / 100 };
 }
+
 
 function topKeywords(
   reviews: ClassifiedReview[],
