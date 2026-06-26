@@ -30,7 +30,28 @@ export const analisarProduto = createServerFn({ method: "POST" })
       const result = await firecrawl.scrape(data.url, {
         onlyMainContent: false,
         waitFor: 2500,
+        // Drive the page like a real user: open the full reviews modal and
+        // scroll to the bottom so ALL opinions (not just the first ones) load
+        // before extraction.
+        actions: [
+          { type: "wait", milliseconds: 2000 },
+          // Click "Mostrar todas as opiniões" (best-effort; ignored if absent).
+          { type: "click", selector: "[data-testid='see-more'], a[href*='reviews'], button" },
+          { type: "wait", milliseconds: 2000 },
+          // Scroll down repeatedly to trigger lazy-loading of more reviews.
+          { type: "scroll", direction: "down" },
+          { type: "wait", milliseconds: 1200 },
+          { type: "scroll", direction: "down" },
+          { type: "wait", milliseconds: 1200 },
+          { type: "scroll", direction: "down" },
+          { type: "wait", milliseconds: 1200 },
+          { type: "scroll", direction: "down" },
+          { type: "wait", milliseconds: 1200 },
+          { type: "scroll", direction: "down" },
+          { type: "wait", milliseconds: 1500 },
+        ],
         formats: [
+
           {
             type: "json",
             prompt:
