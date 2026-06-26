@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { buildReport, type ReviewInput, type SentimentReport } from "./sentiment.server";
+import {
+  buildReport,
+  type ProductAttribute,
+  type ReviewInput,
+  type SentimentReport,
+} from "./sentiment.server";
 
 const inputSchema = z.object({
   url: z.string().trim().url().max(2048),
