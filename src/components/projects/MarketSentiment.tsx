@@ -173,11 +173,22 @@ export function MarketSentiment() {
         </div>
       </Section>
 
-      <Section label="Modelo de sentimento" title="Dois backends plugáveis">
+      <Section label="Tecnologias & modelos" title="O que roda por baixo">
         <FeatureCards
           features={[
             {
-              title: "Léxico PT-BR (padrão)",
+              title: "Coleta — Firecrawl + Playwright",
+              body: (
+                <p>
+                  Navegador real que executa o JavaScript da página, clica em{" "}
+                  <strong>“Mostrar todas as opiniões”</strong> e rola até o fim
+                  para capturar todos os comentários e estrelas — não só os
+                  primeiros visíveis.
+                </p>
+              ),
+            },
+            {
+              title: "Modelo — Léxico PT-BR (padrão)",
               body: (
                 <>
                   <p className="mb-2">
@@ -188,14 +199,14 @@ export function MarketSentiment() {
                       "Dicionário ponderado (-3 a +3)",
                       "Trata negação: \u201cnão recomendo\u201d",
                       "Trata intensificadores: \u201cmuito bom\u201d",
-                      "Estrelas como sinal quando não há texto",
+                      "Estrelas como sinal forte combinado ao texto",
                     ]}
                   />
                 </>
               ),
             },
             {
-              title: "Transformer (opcional)",
+              title: "Modelo — Transformer (opcional)",
               body: (
                 <p>
                   Modelo HuggingFace multilíngue para maior cobertura semântica
@@ -204,46 +215,52 @@ export function MarketSentiment() {
                 </p>
               ),
             },
+            {
+              title: "Stack completa",
+              body: <TechStack items={stack} />,
+            },
           ]}
         />
       </Section>
 
-      <Section label="Fundamentação técnica" title="Decisões de arquitetura documentadas">
+      <Section label="Motivações" title="Por que construí assim">
         <FeatureCards
           features={[
             {
-              title: "Navegador real, não requests",
+              title: "Decidir mais rápido",
               body: (
                 <p>
-                  O marketplace renderiza opiniões e estrelas via JavaScript e
-                  bloqueia tráfego de datacenter. O Playwright executa o JS,
-                  mantém sessão e fecha modais como um usuário.
+                  Ler dezenas de avaliações e caçar especificações cansa. O
+                  objetivo é transformar opiniões dispersas em um relatório claro
+                  em minutos — e comparar dois produtos lado a lado.
                 </p>
               ),
             },
             {
-              title: "Coleta completa de opiniões",
+              title: "Coletar tudo, não uma amostra",
               body: (
                 <p>
-                  Abre o modal \u201cMostrar todas as opiniões\u201d e pagina/rola
-                  até esgotar, deduplicando por prefixo do texto para não contar
-                  o mesmo comentário duas vezes.
+                  O marketplace carrega opiniões via JavaScript e mostra poucas
+                  por vez. Por isso uso navegador real, abro o modal completo e
+                  rolo até esgotar, deduplicando por prefixo do texto.
                 </p>
               ),
             },
             {
-              title: "Backend de sentimento plugável",
+              title: "Transparência e reprodutibilidade",
               body: (
                 <p>
-                  Baseline léxico reprodutível por padrão e transformer quando há
-                  necessidade de cobertura semântica, sem alterar o resto do
-                  pipeline.
+                  O léxico PT-BR é auditável (dá pra ver por que um comentário
+                  ficou positivo ou negativo) e roda sem GPU. O transformer entra
+                  quando há necessidade de cobertura semântica — sem mudar o
+                  resto do pipeline.
                 </p>
               ),
             },
           ]}
         />
       </Section>
+
 
 
     </>
