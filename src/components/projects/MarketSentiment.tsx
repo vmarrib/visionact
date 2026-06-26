@@ -3,20 +3,19 @@ import { Section } from "@/components/Section";
 import { FlowDiagram } from "@/components/FlowDiagram";
 import { TechStack } from "@/components/TechStack";
 
+import { CodeBlock } from "@/components/CodeBlock";
 import { FeatureCards, BulletList } from "@/components/FeatureCards";
 
 const stack = [
   "Python",
-  "Scrapy",
-  "Selenium",
-  "BeautifulSoup",
-  "Kafka",
-  "PostgreSQL",
-  "Docker",
-  "Airflow",
-  "Pandas",
+  "Playwright",
+  "FastAPI",
   "Transformers",
-  "Streamlit",
+  "Pydantic",
+  "Pandas",
+  "Docker",
+  "GitHub Actions",
+  "Pytest",
 ];
 
 export function MarketSentiment() {
@@ -31,37 +30,39 @@ export function MarketSentiment() {
         stack={stack}
       />
 
-      <Section label="O que faz" title="Da palavra-chave ao resumo executivo">
+      <Section label="O que faz" title="Cole o link do produto e receba o relatório">
         <p className="mb-5 text-muted-foreground">
-          A partir de uma única palavra-chave, a plataforma orquestra um crawler,
-          estrutura os dados coletados e roda um pipeline de NLP que entrega
-          sentimento, reclamações, elogios e um resumo executivo pronto para
-          decisão.
+          O usuário cola o link de um produto e o sistema varre{" "}
+          <strong>todas as opiniões e estrelas</strong>, lê as características do
+          produto, roda um <strong>modelo de análise de sentimento</strong> em
+          cada comentário e entrega um <strong>relatório quantitativo</strong>:
+          quantos comentários, distribuição de estrelas, percentual de
+          sentimento e principais elogios e reclamações.
         </p>
         <FeatureCards
           features={[
             {
-              title: "1 · Coleta",
+              title: "1 · Coleta (web scraping)",
               body: (
                 <BulletList
                   items={[
-                    "Recebe uma palavra-chave",
-                    "Executa o crawler",
-                    "Coleta: loja, produto, preço, nº de vendas, avaliação e comentários",
-                    "Persiste os dados brutos em banco",
+                    "Recebe o link do produto",
+                    "Abre a página com navegador real (Playwright)",
+                    "Lê características, preço e avaliação média",
+                    "Varre TODAS as opiniões e estrelas, paginando o modal completo",
                   ]}
                 />
               ),
             },
             {
-              title: "2 · Processamento",
+              title: "2 · Sentimento + relatório",
               body: (
                 <BulletList
                   items={[
-                    "Executa o pipeline de NLP",
-                    "Classifica sentimento: positivo, negativo e neutro",
-                    "Extrai principais reclamações e elogios",
-                    "Gera resumo executivo",
+                    "Classifica cada comentário: positivo, neutro ou negativo",
+                    "Calcula score médio e distribuição de estrelas",
+                    "Extrai termos de elogio e de reclamação",
+                    "Exporta relatório em JSON, Markdown e CSV",
                   ]}
                 />
               ),
@@ -70,18 +71,80 @@ export function MarketSentiment() {
         />
       </Section>
 
-      <Section label="Arquitetura" title="Pipeline de dados ponta a ponta">
+      <Section label="Projeto no GitHub" title="Pronto para clonar e importar">
+        <p className="mb-3 text-muted-foreground">
+          Pacote Python instalável, com CLI (cola o link), API FastAPI,
+          Dockerfile, CI no GitHub Actions, testes e um relatório de exemplo.
+        </p>
+        <CodeBlock
+          filename="market-sentiment/"
+          code={`market-sentiment
+├── README.md
+├── pyproject.toml
+├── requirements.txt
+├── Dockerfile
+├── .github/workflows/ci.yml
+├── market_sentiment
+│   ├── cli.py            # python -m market_sentiment <url>
+│   ├── api.py            # POST /analisar
+│   ├── config.py
+│   ├── models.py         # contratos de dados
+│   ├── scraper           # Playwright: opiniões + estrelas + características
+│   ├── sentiment         # léxico PT-BR ou transformer
+│   └── report            # JSON · Markdown · CSV
+├── tests
+└── examples              # relatório real da JBL Boombox 3`}
+        />
+        <div className="mt-4 flex flex-wrap gap-3">
+          <a
+            href="/market-sentiment-ai.zip"
+            download
+            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-mono text-sm text-foreground transition-colors hover:bg-secondary"
+          >
+            ↓ baixar projeto completo (.zip)
+          </a>
+          <a
+            href="/mercadolivre_crawler_colab.py"
+            download
+            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-mono text-sm text-foreground transition-colors hover:bg-secondary"
+          >
+            ↓ baixar coletor (.py)
+          </a>
+        </div>
+      </Section>
+
+      <Section label="Como usar" title="Da CLI ao relatório">
+        <CodeBlock
+          filename="terminal"
+          code={`pip install -r requirements.txt
+playwright install chromium
+
+python -m market_sentiment \\
+  "https://www.mercadolivre.com.br/.../p/MLB46273431"`}
+        />
+        <p className="mt-4 mb-2 text-muted-foreground">
+          Saída do relatório (resumo):
+        </p>
+        <CodeBlock
+          code={`Comentários coletados: 12  |  com estrelas: 12
+Estrelas: 5★ 7 · 4★ 2 · 3★ 0 · 2★ 2 · 1★ 1   (média 4.0)
+Sentimento: positivo 75% · neutro 0% · negativo 25%
+Elogios:    potente, qualidade, recomendo
+Reclamações: defeito, caro, esquentando`}
+        />
+      </Section>
+
+      <Section label="Arquitetura" title="Pipeline ponta a ponta">
         <FlowDiagram
           steps={[
-            "Crawler",
-            "Kafka",
-            "Raw Data Lake",
-            "ETL",
-            "PostgreSQL",
-            "NLP Pipeline",
-            "Dashboard",
+            "Link do produto",
+            "Playwright",
+            "Opiniões + estrelas",
+            "Modelo de sentimento",
+            "Métricas",
+            "Relatório",
           ]}
-          caption="Ingestão assíncrona desacopla a coleta do processamento e permite reprocessar dados históricos."
+          caption="Contratos de dados (dataclasses) desacoplam scraping, modelo e relatório, facilitando adicionar novos marketplaces."
         />
         <div className="mt-6">
           <p className="mb-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
@@ -91,33 +154,35 @@ export function MarketSentiment() {
         </div>
       </Section>
 
-      <Section label="Features avançadas" title="Além da classificação básica">
+      <Section label="Modelo de sentimento" title="Dois backends plugáveis">
         <FeatureCards
           features={[
             {
-              title: "Topic Modeling",
+              title: "Léxico PT-BR (padrão)",
               body: (
                 <>
-                  <p className="mb-2">Descobre automaticamente os temas recorrentes:</p>
+                  <p className="mb-2">
+                    Baseline transparente e auditável, sem download de modelos:
+                  </p>
                   <BulletList
                     items={[
-                      "Problemas de bateria",
-                      "Entrega",
-                      "Qualidade",
-                      "Atendimento",
+                      "Dicionário ponderado (-3 a +3)",
+                      "Trata negação: \u201cnão recomendo\u201d",
+                      "Trata intensificadores: \u201cmuito bom\u201d",
+                      "Estrelas como sinal quando não há texto",
                     ]}
                   />
                 </>
               ),
             },
             {
-              title: "Resumo executivo com LLM",
+              title: "Transformer (opcional)",
               body: (
-                <div className="rounded-md border border-border bg-surface p-3 font-mono text-xs leading-relaxed text-surface-foreground">
-                  Foram analisados 45.000 comentários. 73% apresentam sentimento
-                  positivo. Os principais problemas relatados foram atraso na
-                  entrega e baixa durabilidade.
-                </div>
+                <p>
+                  Modelo HuggingFace multilíngue para maior cobertura semântica
+                  (ironia, contexto), ativável por variável de ambiente quando há
+                  GPU disponível.
+                </p>
               ),
             },
           ]}
@@ -128,37 +193,39 @@ export function MarketSentiment() {
         <FeatureCards
           features={[
             {
-              title: "Escalabilidade do crawler",
+              title: "Navegador real, não requests",
               body: (
                 <p>
-                  Filas Kafka, paralelismo de workers e controle de rate
-                  limiting desacoplam coleta de processamento e absorvem picos
-                  sem perder dados.
+                  O marketplace renderiza opiniões e estrelas via JavaScript e
+                  bloqueia tráfego de datacenter. O Playwright executa o JS,
+                  mantém sessão e fecha modais como um usuário.
                 </p>
               ),
             },
             {
-              title: "Deduplicação de comentários",
+              title: "Coleta completa de opiniões",
               body: (
                 <p>
-                  Hash MD5 por comentário na camada de ETL garante
-                  idempotência e evita reprocessar avaliações repetidas.
+                  Abre o modal \u201cMostrar todas as opiniões\u201d e pagina/rola
+                  até esgotar, deduplicando por prefixo do texto para não contar
+                  o mesmo comentário duas vezes.
                 </p>
               ),
             },
             {
-              title: "BERT em vez de TF-IDF",
+              title: "Backend de sentimento plugável",
               body: (
                 <p>
-                  Modelos transformer capturam contexto semântico das
-                  avaliações, reduzindo erro de classificação em frases com
-                  ironia e negação.
+                  Baseline léxico reprodutível por padrão e transformer quando há
+                  necessidade de cobertura semântica, sem alterar o resto do
+                  pipeline.
                 </p>
               ),
             },
           ]}
         />
       </Section>
+
 
     </>
   );
