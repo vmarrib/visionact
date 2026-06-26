@@ -30,15 +30,25 @@ export const analisarProduto = createServerFn({ method: "POST" })
       const result = await firecrawl.scrape(data.url, {
         onlyMainContent: false,
         waitFor: 2500,
-        // Drive the page like a real user: open the full reviews modal and
+        // Drive the page like a real user: open the full reviews list and
         // scroll to the bottom so ALL opinions (not just the first ones) load
         // before extraction.
         actions: [
           { type: "wait", milliseconds: 2000 },
-          // Click "Mostrar todas as opiniões" (best-effort; ignored if absent).
-          { type: "click", selector: "[data-testid='see-more'], a[href*='reviews'], button" },
+          // Scroll to the reviews section first.
+          { type: "scroll", direction: "down" },
+          { type: "wait", milliseconds: 800 },
+          // Click "Mostrar todas as opiniões" by text (robust: never throws if absent).
+          {
+            type: "executeJavascript",
+            script:
+              "const t=['mostrar todas','todas as opini','ver todas','mostrar mais','see all','show all'];const els=[...document.querySelectorAll('button,a,span')];const hit=els.find(e=>{const x=(e.textContent||'').trim().toLowerCase();return t.some(k=>x.includes(k));});if(hit){hit.click();}",
+          },
           { type: "wait", milliseconds: 2000 },
-          // Scroll down repeatedly to trigger lazy-loading of more reviews.
+          // Scroll down repeatedly to trigger lazy-loading of more reviews
+          // (inside the modal/list).
+          { type: "scroll", direction: "down" },
+          { type: "wait", milliseconds: 1200 },
           { type: "scroll", direction: "down" },
           { type: "wait", milliseconds: 1200 },
           { type: "scroll", direction: "down" },
@@ -50,6 +60,7 @@ export const analisarProduto = createServerFn({ method: "POST" })
           { type: "scroll", direction: "down" },
           { type: "wait", milliseconds: 1500 },
         ],
+
         formats: [
 
           {
