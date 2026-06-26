@@ -5,44 +5,65 @@ import type { SentimentReport } from "@/lib/sentiment.server";
 
 const EXAMPLE_URL =
   "https://www.mercadolivre.com.br/jbl-boombox-3-bluetooth-squad-jblboombox3squadbr/p/MLB46273431";
+const EXAMPLE_URL_B =
+  "https://www.mercadolivre.com.br/caixa-de-som-jbl-charge-5-portatil-com-bluetooth-preta/p/MLB16585567";
 
 const STEPS = [
   "Abrindo a página do produto",
   "Coletando opiniões e estrelas",
+  "Lendo características do produto",
   "Classificando o sentimento",
   "Montando o relatório",
 ];
 
+type Mode = "single" | "compare";
+type Loaded = { report: SentimentReport; sourceUrl: string };
+
 export function MarketSentimentDemo() {
   const analyze = useServerFn(analisarProduto);
-  const [url, setUrl] = useState("");
+  const [mode, setMode] = useState<Mode>("single");
+  const [urlA, setUrlA] = useState("");
+  const [urlB, setUrlB] = useState("");
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [report, setReport] = useState<SentimentReport | null>(null);
-  const [sourceUrl, setSourceUrl] = useState<string | null>(null);
+  const [a, setA] = useState<Loaded | null>(null);
+  const [b, setB] = useState<Loaded | null>(null);
 
-  async function run(targetUrl: string) {
-    if (!targetUrl.trim()) return;
+  async function analyzeOne(url: string): Promise<Loaded> {
+    const res = (await analyze({ data: { url: url.trim() } })) as AnalyzeResult;
+    if (!res.success) throw new Error(res.error);
+    return { report: res.report, sourceUrl: res.sourceUrl };
+  }
+
+  async function run() {
+    if (!urlA.trim()) return;
+    if (mode === "compare" && !urlB.trim()) return;
+
     setLoading(true);
     setError(null);
-    setReport(null);
+    setA(null);
+    setB(null);
     setStep(0);
 
     const ticker = setInterval(() => {
       setStep((s) => (s < STEPS.length - 1 ? s + 1 : s));
-    }, 1600);
+    }, 1400);
 
     try {
-      const res = (await analyze({ data: { url: targetUrl.trim() } })) as AnalyzeResult;
-      if (res.success) {
-        setReport(res.report);
-        setSourceUrl(res.sourceUrl);
+      if (mode === "single") {
+        setA(await analyzeOne(urlA));
       } else {
-        setError(res.error);
+        const [ra, rb] = await Promise.all([analyzeOne(urlA), analyzeOne(urlB)]);
+        setA(ra);
+        setB(rb);
       }
-    } catch {
-      setError("Algo deu errado ao analisar o link. Verifique a URL e tente novamente.");
+    } catch (err) {
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : "Algo deu errado ao analisar o link. Verifique a URL e tente novamente.",
+      );
     } finally {
       clearInterval(ticker);
       setLoading(false);
@@ -51,28 +72,74 @@ export function MarketSentimentDemo() {
 
   return (
     <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+      {/* Mode toggle */}
+      <div className="mb-4 inline-flex rounded-lg border border-border bg-background p-1 font-mono text-xs">
+        {(
+          [
+            ["single", "1 produto"],
+            ["compare", "comparar 2"],
+          ] as [Mode, string][]
+        ).map(([m, label]) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => {
+              setMode(m);
+              setError(null);
+            }}
+            disabled={loading}
+            className={`rounded-md px-3 py-1.5 transition-colors disabled:opacity-60 ${
+              mode === m
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          run(url);
+          run();
         }}
-        className="flex flex-col gap-3 sm:flex-row"
+        className="space-y-3"
       >
         <input
           type="url"
           inputMode="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="Cole o link de um produto (ex.: Mercado Livre)"
-          className="flex-1 rounded-md border border-input bg-background px-3 py-2.5 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30"
+          value={urlA}
+          onChange={(e) => setUrlA(e.target.value)}
+          placeholder={
+            mode === "compare"
+              ? "Produto A — cole o link"
+              : "Cole o link de um produto (ex.: Mercado Livre)"
+          }
+          className="w-full rounded-md border border-input bg-background px-3 py-2.5 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30"
           required
         />
+        {mode === "compare" && (
+          <input
+            type="url"
+            inputMode="url"
+            value={urlB}
+            onChange={(e) => setUrlB(e.target.value)}
+            placeholder="Produto B — cole o link"
+            className="w-full rounded-md border border-input bg-background px-3 py-2.5 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30"
+            required
+          />
+        )}
         <button
           type="submit"
           disabled={loading}
           className="inline-flex items-center justify-center gap-2 rounded-md bg-foreground px-5 py-2.5 font-mono text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-60"
         >
-          {loading ? "analisando…" : "analisar →"}
+          {loading
+            ? "analisando…"
+            : mode === "compare"
+              ? "comparar →"
+              : "analisar →"}
         </button>
       </form>
 
@@ -81,13 +148,13 @@ export function MarketSentimentDemo() {
         <button
           type="button"
           onClick={() => {
-            setUrl(EXAMPLE_URL);
-            run(EXAMPLE_URL);
+            setUrlA(EXAMPLE_URL);
+            if (mode === "compare") setUrlB(EXAMPLE_URL_B);
           }}
           disabled={loading}
           className="rounded-md border border-border px-2 py-1 text-foreground transition-colors hover:bg-secondary disabled:opacity-60"
         >
-          JBL Boombox 3 (exemplo)
+          {mode === "compare" ? "JBL Boombox 3 × Charge 5" : "JBL Boombox 3 (exemplo)"}
         </button>
       </div>
 
@@ -124,22 +191,149 @@ export function MarketSentimentDemo() {
         </div>
       )}
 
-      {report && !loading && <Report report={report} sourceUrl={sourceUrl} />}
+      {!loading && mode === "single" && a && (
+        <Report report={a.report} sourceUrl={a.sourceUrl} />
+      )}
+
+      {!loading && mode === "compare" && a && b && (
+        <Comparison a={a} b={b} />
+      )}
     </div>
   );
 }
 
+/* ------------------------------- Comparison ------------------------------- */
+
+function Comparison({ a, b }: { a: Loaded; b: Loaded }) {
+  const ra = a.report;
+  const rb = b.report;
+
+  const winner =
+    ra.sentimentPct.positivo === rb.sentimentPct.positivo
+      ? null
+      : ra.sentimentPct.positivo > rb.sentimentPct.positivo
+        ? "a"
+        : "b";
+
+  return (
+    <div className="mt-6 space-y-6 border-t border-border pt-5">
+      {/* Verdict */}
+      <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+        <p className="mb-1 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          Veredito
+        </p>
+        <p className="text-sm leading-relaxed text-foreground">
+          {winner === null ? (
+            <>Os dois produtos têm o mesmo nível de aprovação ({ra.sentimentPct.positivo}% positivo).</>
+          ) : (
+            <>
+              <strong>{(winner === "a" ? ra : rb).productName}</strong> sai na
+              frente com{" "}
+              <strong>
+                {(winner === "a" ? ra : rb).sentimentPct.positivo}% de opiniões
+                positivas
+              </strong>{" "}
+              contra {(winner === "a" ? rb : ra).sentimentPct.positivo}% do outro.
+            </>
+          )}
+        </p>
+      </div>
+
+      {/* Metric comparison rows */}
+      <div className="overflow-hidden rounded-lg border border-border">
+        <div className="grid grid-cols-3 bg-secondary/50 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+          <div className="p-3">Métrica</div>
+          <div className="truncate p-3 text-foreground" title={ra.productName}>
+            {ra.productName}
+          </div>
+          <div className="truncate p-3 text-foreground" title={rb.productName}>
+            {rb.productName}
+          </div>
+        </div>
+        <CompareRow
+          label="Nota média"
+          va={ra.averageRating != null ? `${ra.averageRating}★` : "—"}
+          vb={rb.averageRating != null ? `${rb.averageRating}★` : "—"}
+          winA={(ra.averageRating ?? 0) > (rb.averageRating ?? 0)}
+          winB={(rb.averageRating ?? 0) > (ra.averageRating ?? 0)}
+        />
+        <CompareRow
+          label="Opiniões"
+          va={String(ra.totalReviews)}
+          vb={String(rb.totalReviews)}
+          winA={ra.totalReviews > rb.totalReviews}
+          winB={rb.totalReviews > ra.totalReviews}
+        />
+        <CompareRow
+          label="% Positivas"
+          va={`${ra.sentimentPct.positivo}%`}
+          vb={`${rb.sentimentPct.positivo}%`}
+          winA={ra.sentimentPct.positivo > rb.sentimentPct.positivo}
+          winB={rb.sentimentPct.positivo > ra.sentimentPct.positivo}
+        />
+        <CompareRow
+          label="% Negativas"
+          va={`${ra.sentimentPct.negativo}%`}
+          vb={`${rb.sentimentPct.negativo}%`}
+          winA={ra.sentimentPct.negativo < rb.sentimentPct.negativo}
+          winB={rb.sentimentPct.negativo < ra.sentimentPct.negativo}
+        />
+      </div>
+
+      {/* Side-by-side reports */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Report report={ra} sourceUrl={a.sourceUrl} compact />
+        <Report report={rb} sourceUrl={b.sourceUrl} compact />
+      </div>
+    </div>
+  );
+}
+
+function CompareRow({
+  label,
+  va,
+  vb,
+  winA,
+  winB,
+}: {
+  label: string;
+  va: string;
+  vb: string;
+  winA: boolean;
+  winB: boolean;
+}) {
+  return (
+    <div className="grid grid-cols-3 border-t border-border text-sm">
+      <div className="p-3 font-mono text-xs text-muted-foreground">{label}</div>
+      <div className={`p-3 font-semibold ${winA ? "text-positive" : "text-foreground"}`}>
+        {va} {winA && "✓"}
+      </div>
+      <div className={`p-3 font-semibold ${winB ? "text-positive" : "text-foreground"}`}>
+        {vb} {winB && "✓"}
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------------- Report --------------------------------- */
+
 function Report({
   report,
   sourceUrl,
+  compact = false,
 }: {
   report: SentimentReport;
   sourceUrl: string | null;
+  compact?: boolean;
 }) {
   const maxStar = Math.max(1, ...report.starDistribution.map((s) => s.count));
   return (
-    <div className="mt-6 space-y-6">
-      <div className="flex flex-wrap items-baseline justify-between gap-2 border-t border-border pt-5">
+    <div className={compact ? "space-y-5" : "mt-6 space-y-6"}>
+      <div
+        className={`flex flex-wrap items-baseline justify-between gap-2 ${
+          compact ? "" : "border-t border-border pt-5"
+        }`}
+      >
         <h3 className="text-lg font-semibold tracking-tight text-foreground">
           {report.productName}
         </h3>
@@ -155,12 +349,19 @@ function Report({
         )}
       </div>
 
+      {/* Qualitative summary */}
+      <div className="rounded-lg border border-border bg-background p-4">
+        <p className="mb-1.5 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          Resumo qualitativo
+        </p>
+        <p className="text-sm leading-relaxed text-foreground">
+          {report.qualitativeSummary}
+        </p>
+      </div>
+
       {/* Big stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat
-          label="Opiniões"
-          value={String(report.totalReviews)}
-        />
+        <Stat label="Opiniões" value={String(report.totalReviews)} />
         <Stat
           label="Nota média"
           value={report.averageRating != null ? `${report.averageRating}★` : "—"}
@@ -176,6 +377,30 @@ function Report({
           tone="negative"
         />
       </div>
+
+      {/* Characteristics */}
+      {report.attributes.length > 0 && (
+        <div>
+          <p className="mb-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            Características do produto
+          </p>
+          <dl className="grid gap-2 sm:grid-cols-2">
+            {report.attributes.map((attr) => (
+              <div
+                key={attr.label + attr.value}
+                className="flex items-baseline justify-between gap-3 rounded-md border border-border bg-background px-3 py-2"
+              >
+                <dt className="font-mono text-xs text-muted-foreground">
+                  {attr.label}
+                </dt>
+                <dd className="text-right text-sm font-medium text-foreground">
+                  {attr.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
 
       {/* Sentiment bar */}
       <div>
@@ -233,11 +458,7 @@ function Report({
 
       {/* Praise / complaints */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <KeywordCard
-          title="Elogios mais citados"
-          words={report.praise}
-          tone="positive"
-        />
+        <KeywordCard title="Elogios mais citados" words={report.praise} tone="positive" />
         <KeywordCard
           title="Reclamações mais citadas"
           words={report.complaints}

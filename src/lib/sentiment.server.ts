@@ -118,6 +118,8 @@ function topKeywords(
     .map(([w]) => w);
 }
 
+export type ProductAttribute = { label: string; value: string };
+
 export type SentimentReport = {
   productName: string;
   totalReviews: number;
@@ -128,13 +130,47 @@ export type SentimentReport = {
   sentimentPct: { positivo: number; neutro: number; negativo: number };
   praise: string[];
   complaints: string[];
+  attributes: ProductAttribute[];
+  qualitativeSummary: string;
   sample: { text: string; rating: number | null; sentiment: Sentiment }[];
 };
+
+function buildQualitativeSummary(
+  productName: string,
+  total: number,
+  average: number | null,
+  pct: { positivo: number; neutro: number; negativo: number },
+  praise: string[],
+  complaints: string[],
+): string {
+  const parts: string[] = [];
+  const verdict =
+    pct.positivo >= 70
+      ? "muito bem avaliado"
+      : pct.positivo >= 50
+        ? "bem avaliado no geral"
+        : pct.negativo >= 50
+          ? "mal avaliado"
+          : "com avaliações divididas";
+  parts.push(
+    `${productName} está ${verdict}: ${pct.positivo}% das ${total} opiniões são positivas` +
+      (average != null ? `, com nota média ${average}★` : "") +
+      ".",
+  );
+  if (praise.length > 0) {
+    parts.push(`Os clientes elogiam principalmente ${praise.slice(0, 3).join(", ")}.`);
+  }
+  if (complaints.length > 0) {
+    parts.push(`As reclamações mais comuns citam ${complaints.slice(0, 3).join(", ")}.`);
+  }
+  return parts.join(" ");
+}
 
 export function buildReport(
   productName: string,
   reviews: ReviewInput[],
   declaredAverage?: number | null,
+  attributes: ProductAttribute[] = [],
 ): SentimentReport {
   const classified = reviews
     .map(classifyReview)
@@ -174,6 +210,9 @@ export function buildReport(
     .slice(0, 6)
     .map((r) => ({ text: r.text, rating: r.rating, sentiment: r.sentiment }));
 
+  const praise = topKeywords(positiveReviews, POSITIVE);
+  const complaints = topKeywords(negativeReviews, NEGATIVE);
+
   return {
     productName,
     totalReviews: classified.length,
@@ -182,8 +221,20 @@ export function buildReport(
     starDistribution: [5, 4, 3, 2, 1].map((s) => ({ star: s, count: star[s] })),
     sentiment: counts,
     sentimentPct: pct,
-    praise: topKeywords(positiveReviews, POSITIVE),
-    complaints: topKeywords(negativeReviews, NEGATIVE),
+    praise,
+    complaints,
+    attributes: attributes
+      .filter((a) => a && a.label && a.value)
+      .slice(0, 8)
+      .map((a) => ({ label: String(a.label).trim(), value: String(a.value).trim() })),
+    qualitativeSummary: buildQualitativeSummary(
+      productName,
+      classified.length,
+      average,
+      pct,
+      praise,
+      complaints,
+    ),
     sample,
   };
 }

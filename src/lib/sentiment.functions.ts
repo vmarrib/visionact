@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { buildReport, type ReviewInput, type SentimentReport } from "./sentiment.server";
+import {
+  buildReport,
+  type ProductAttribute,
+  type ReviewInput,
+  type SentimentReport,
+} from "./sentiment.server";
 
 const inputSchema = z.object({
   url: z.string().trim().url().max(2048),
@@ -29,13 +34,23 @@ export const analisarProduto = createServerFn({ method: "POST" })
           {
             type: "json",
             prompt:
-              "Extraia o nome do produto, a nota média (0 a 5), o total de avaliações e TODAS as opiniões/avaliações de clientes visíveis na página. Para cada opinião, retorne o texto completo do comentário e a quantidade de estrelas (1 a 5). Inclua o máximo de comentários possível.",
+              "Extraia: (1) o nome do produto; (2) a nota média (0 a 5); (3) o total de avaliações; (4) as principais características técnicas/especificações do produto (ex.: marca, potência, bateria, conectividade, dimensões, cor) como pares rótulo/valor; (5) TODAS as opiniões/avaliações de clientes visíveis na página, com o texto completo do comentário e a quantidade de estrelas (1 a 5). Inclua o máximo de comentários possível.",
             schema: {
               type: "object",
               properties: {
                 productName: { type: "string" },
                 averageRating: { type: "number" },
                 totalReviews: { type: "number" },
+                attributes: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      label: { type: "string" },
+                      value: { type: "string" },
+                    },
+                  },
+                },
                 reviews: {
                   type: "array",
                   items: {
@@ -58,6 +73,7 @@ export const analisarProduto = createServerFn({ method: "POST" })
             productName?: string;
             averageRating?: number;
             totalReviews?: number;
+            attributes?: { label?: string; value?: string }[];
             reviews?: { text?: string; rating?: number }[];
           }
         | undefined;
@@ -77,10 +93,15 @@ export const analisarProduto = createServerFn({ method: "POST" })
         };
       }
 
+      const attributes: ProductAttribute[] = (json?.attributes ?? [])
+        .filter((a) => a && typeof a.label === "string" && typeof a.value === "string")
+        .map((a) => ({ label: a.label as string, value: a.value as string }));
+
       const report = buildReport(
         json?.productName?.trim() || "Produto",
         reviews,
         typeof json?.averageRating === "number" ? json.averageRating : null,
+        attributes,
       );
 
       return { success: true, report, sourceUrl: data.url };
