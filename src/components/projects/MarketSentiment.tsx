@@ -152,14 +152,6 @@ export function MarketSentiment() {
             ↓ baixar coletor (.py)
           </a>
         </div>
-          <a
-            href="/mercadolivre_crawler_colab.py"
-            download
-            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-mono text-sm text-foreground transition-colors hover:bg-secondary"
-          >
-            ↓ baixar coletor (.py)
-          </a>
-        </div>
       </Section>
 
       <Section label="Como usar" title="Da CLI ao relatório">
