@@ -2,8 +2,6 @@ import { ProjectHeader } from "@/components/ProjectHeader";
 import { Section } from "@/components/Section";
 import { FlowDiagram } from "@/components/FlowDiagram";
 import { TechStack } from "@/components/TechStack";
-
-import { CodeBlock } from "@/components/CodeBlock";
 import { FeatureCards, BulletList } from "@/components/FeatureCards";
 import { MarketSentimentDemo } from "@/components/projects/MarketSentimentDemo";
 
