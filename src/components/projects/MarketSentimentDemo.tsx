@@ -383,10 +383,12 @@ function Report({
   report,
   sourceUrl,
   compact = false,
+  badge,
 }: {
   report: SentimentReport;
   sourceUrl: string | null;
   compact?: boolean;
+  badge?: string;
 }) {
   const maxStar = Math.max(1, ...report.starDistribution.map((s) => s.count));
   return (
@@ -396,7 +398,12 @@ function Report({
           compact ? "" : "border-t border-border pt-5"
         }`}
       >
-        <h3 className="text-lg font-semibold tracking-tight text-foreground">
+        <h3 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-foreground">
+          {badge && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground font-mono text-[10px] text-background">
+              {badge}
+            </span>
+          )}
           {report.productName}
         </h3>
         {sourceUrl && (
