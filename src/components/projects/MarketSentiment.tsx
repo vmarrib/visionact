@@ -130,12 +130,28 @@ export function MarketSentiment() {
         />
         <div className="mt-4 flex flex-wrap gap-3">
           <a
+            href={REPO_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2 font-mono text-sm text-background transition-opacity hover:opacity-90"
+          >
+            ver repositório no GitHub →
+          </a>
+          <a
             href="/market-sentiment-ai.zip"
             download
             className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-mono text-sm text-foreground transition-colors hover:bg-secondary"
           >
             ↓ baixar projeto completo (.zip)
           </a>
+          <a
+            href="/mercadolivre_crawler_colab.py"
+            download
+            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-mono text-sm text-foreground transition-colors hover:bg-secondary"
+          >
+            ↓ baixar coletor (.py)
+          </a>
+        </div>
           <a
             href="/mercadolivre_crawler_colab.py"
             download
