@@ -8,6 +8,7 @@ export function ProjectHeader({
   domain,
   problem,
   stack,
+  github,
 }: {
   index: string;
   name: string;
@@ -15,6 +16,7 @@ export function ProjectHeader({
   domain: string;
   problem: string;
   stack: string[];
+  github?: string;
 }) {
   return (
     <header className="border-b border-border py-10">
@@ -35,6 +37,16 @@ export function ProjectHeader({
         {name}
       </h1>
       <p className="mt-2 text-lg text-muted-foreground">{tagline}</p>
+      {github && (
+        <a
+          href={github}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:bg-secondary"
+        >
+          ver repositório no GitHub →
+        </a>
+      )}
 
       <div className="mt-6 rounded-lg border border-border bg-surface p-5">
         <p className="font-mono text-xs uppercase tracking-widest text-primary">

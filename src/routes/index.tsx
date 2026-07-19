@@ -9,13 +9,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Portfólio de Vanessa M. Ribeiro: engenharia de dados, NLP, visão computacional e produtos guiados por IA. Três projetos detalhados de ponta a ponta.",
+          "Portfólio de Vanessa M. Ribeiro: engenharia de dados aplicada a domínios sensíveis do mundo real — saúde, compliance e biometria. Três projetos em produção, de ponta a ponta.",
       },
       { property: "og:title", content: "Vanessa M. Ribeiro, Engenheira & Cientista de Dados" },
       {
         property: "og:description",
         content:
-          "Engenharia de dados, NLP, visão computacional e produtos de IA, três projetos detalhados de ponta a ponta.",
+          "Engenharia de dados aplicada a saúde, compliance e biometria — três projetos em produção, de ponta a ponta.",
       },
     ],
   }),
@@ -24,12 +24,12 @@ export const Route = createFileRoute("/")({
 
 const skills = [
   "Data Engineering",
-  "NLP",
+  "PostgreSQL & RLS",
+  "Supabase",
+  "Applied AI / LLMs",
   "Computer Vision",
-  "MLOps",
-  "Distributed Systems",
-  "LLMs",
-  "Product",
+  "Compliance & Risk",
+  "TypeScript / React",
 ];
 
 function Index() {

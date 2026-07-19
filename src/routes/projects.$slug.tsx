@@ -2,16 +2,14 @@ import type { ComponentType } from "react";
 import { createFileRoute, notFound, useRouter, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { projects } from "@/lib/projects";
-import { MarketSentiment } from "@/components/projects/MarketSentiment";
-import { VisionGuard } from "@/components/projects/VisionGuard";
-import { Pitaia } from "@/components/projects/Pitaia";
-import { ComplianceRisk } from "@/components/projects/ComplianceRisk";
+import { PitaIA } from "@/components/projects/PitaIA";
+import { DueCheck } from "@/components/projects/DueCheck";
+import { PontoInteligente } from "@/components/projects/PontoInteligente";
 
 const content: Record<string, ComponentType> = {
-  "market-sentiment": MarketSentiment,
-  visionguard: VisionGuard,
-  pitaia: Pitaia,
-  "compliance-risk": ComplianceRisk,
+  pitaia: PitaIA,
+  "due-check": DueCheck,
+  "ponto-inteligente": PontoInteligente,
 };
 
 export const Route = createFileRoute("/projects/$slug")({
