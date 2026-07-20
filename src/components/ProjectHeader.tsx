@@ -44,7 +44,7 @@ export function ProjectHeader({
           rel="noreferrer"
           className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:bg-secondary"
         >
-          ver código no GitHub →
+          ver repositório no GitHub →
         </a>
       )}
 
