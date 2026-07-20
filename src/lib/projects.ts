@@ -21,7 +21,7 @@ export const projects: ProjectMeta[] = [
     domain: "Data Engineering · Applied AI",
     stack: ["React", "Supabase", "PostgreSQL", "Row Level Security", "Edge Functions", "Claude API"],
     accent: "Health data platform",
-    github: "https://github.com/vmarrib/apitaia",
+    github: "https://github.com/vmarrib/visionact/tree/main/showcases/pitaia",
   },
   {
     slug: "due-check",
@@ -33,7 +33,7 @@ export const projects: ProjectMeta[] = [
     domain: "Data Engineering · Risk & Compliance",
     stack: ["TanStack Start", "React", "Supabase", "PostgreSQL", "Row Level Security", "jsPDF"],
     accent: "Regulatory grade",
-    github: "https://github.com/vmarrib/due-check",
+    github: "https://github.com/vmarrib/visionact/tree/main/showcases/due-check",
   },
   {
     slug: "ponto-inteligente",
@@ -45,7 +45,7 @@ export const projects: ProjectMeta[] = [
     domain: "Data Engineering · Applied AI",
     stack: ["React", "TanStack Start", "Supabase", "PostgreSQL", "Row Level Security", "face-api.js"],
     accent: "Field workforce",
-    github: "https://github.com/vmarrib/moreira-ponto-inteligente",
+    github: "https://github.com/vmarrib/visionact/tree/main/showcases/ponto-inteligente",
   },
 ];
 

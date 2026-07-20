@@ -88,7 +88,7 @@ export function DueCheck() {
           steps={[
             "Matriz de risco configurada",
             "Consulta paralela a bureaus",
-            "Motor de regras (score)",
+            "Regras automáticas (score)",
             "Dossiê auditável (PDF/Excel)",
           ]}
           caption="Uma rota pública sem autenticação (link de coleta) usa um client isolado com privilégio de serviço, sem expor RLS a usuários anônimos."
