@@ -1,0 +1,32 @@
+# Checagem de Risco — exemplo de configuração declarativa de regras.
+#
+# Uma regra nova (ou o ajuste de um peso) é uma mudança NESTE arquivo, não
+# uma mudança de código — rules_engine.py interpreta esta estrutura
+# genericamente. Pesos e limiares abaixo são exemplos ilustrativos, não os
+# valores usados em produção.
+
+rule_version: "example-1.0"
+
+# Sinais de veto: se QUALQUER um destes disparar, a recomendação é
+# automaticamente "reject", independente do score ponderado.
+veto_signals:
+  - signal_id: sanctions_list
+    status: hit
+    reason: "Contraparte presente em lista de sanções ativa"
+
+# Sinais ponderados: só avaliados se nenhum veto disparou. O score final é
+# a média ponderada das intensidades (0 a 1) de cada sinal presente.
+weighted_signals:
+  - signal_id: registry
+    weight: 0.3
+  - signal_id: court_records
+    weight: 0.3
+  - signal_id: media_fraud_mention
+    weight: 0.9
+  - signal_id: media_investigation_mention
+    weight: 0.5
+
+# Limiares de recomendação sobre o score ponderado (0 a 1).
+thresholds:
+  reject: 0.7
+  manual_review: 0.35

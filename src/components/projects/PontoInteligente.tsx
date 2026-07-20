@@ -15,16 +15,60 @@ export function PontoInteligente() {
         name={meta.name}
         tagline={meta.tagline}
         domain={meta.domain}
-        problem="Equipes de campo precisam registrar ponto de forma confiável: confirmar que a pessoa está fisicamente no local autorizado e que é de fato ela batendo o ponto. O Ponto Inteligente valida cada registro com geofencing e reconhecimento facial, com rastreamento de jornada e um fluxo administrativo completo de aprovação e alertas."
+        problem="Construído sob encomenda, com exclusividade, para uma indústria de alimentos com múltiplas plantas e turnos de produção: confirmar que a pessoa está fisicamente no local autorizado e que é de fato ela batendo o ponto, num contexto onde o cliente já enfrentava disputas trabalhistas por registro de jornada inconfiável."
         stack={meta.stack}
         github={meta.github}
       />
 
-      <Section label="Geolocalização" title="Geofencing com Haversine, implementado do zero">
+      <Section label="Planejamento de produto" title="Da descoberta em chão de fábrica ao MVP">
+        <p className="mb-4 text-muted-foreground">
+          O trabalho começou antes de qualquer linha de código, acompanhando um turno completo
+          numa planta para entender onde o processo de ponto até então falhava — digitais
+          desgastadas por trabalho manual, filas na catraca no início do turno, e colegas batendo
+          ponto uns pelos outros.
+        </p>
+        <FeatureCards
+          features={[
+            {
+              title: "Escopo do MVP",
+              body: (
+                <p>
+                  Geofencing + reconhecimento facial (não NFC ou digital) foi decisão direta da
+                  descoberta: digital tem alta rejeição em mãos de trabalho manual, e um crachá
+                  pode ser emprestado.
+                </p>
+              ),
+            },
+            {
+              title: "Alinhamento jurídico",
+              body: (
+                <p>
+                  O formato do dossiê de auditoria foi desenhado com o time jurídico do cliente,
+                  pensando em como esse histórico serviria de evidência numa disputa trabalhista.
+                </p>
+              ),
+            },
+            {
+              title: "Rollout faseado",
+              body: (
+                <p>
+                  Implantado numa planta-piloto por 30 dias, com coleta ativa de feedback dos
+                  supervisores sobre falsos negativos, antes de expandir para as demais plantas.
+                </p>
+              ),
+            },
+          ]}
+        />
+      </Section>
+
+      <Section label="Geolocalização" title="Geofencing com Haversine, e a precisão do GPS importa">
         <p className="text-muted-foreground">
           A distância entre a posição do funcionário e cada local autorizado é calculada com a
-          fórmula de Haversine implementada diretamente no código, sem depender de biblioteca
-          externa — a busca escolhe o local ativo cujo raio mais próximo contém o ponto.
+          fórmula de Haversine implementada diretamente no código. Mas coordenada sozinha não
+          basta: a Geolocation API do navegador retorna também um raio de incerteza da própria
+          leitura, e uma leitura imprecisa demais (comum dentro de um galpão) é rejeitada antes de
+          basear qualquer decisão de geofence nela — em vez de confiar cegamente em qualquer
+          coordenada retornada.
         </p>
       </Section>
 
@@ -39,6 +83,22 @@ export function PontoInteligente() {
                   comparação por distância euclidiana normalizada — nenhum dado biométrico
                   trafega para um serviço de terceiros.
                 </p>
+              ),
+            },
+            {
+              title: "Checagem de qualidade",
+              body: (
+                <>
+                  <p className="mb-2">Rejeitado antes de extrair o descritor, com mensagem específica:</p>
+                  <BulletList
+                    items={[
+                      "Nenhum rosto detectado",
+                      "Mais de um rosto no quadro",
+                      "Confiança de detecção baixa",
+                      "Rosto pequeno demais no enquadramento",
+                    ]}
+                  />
+                </>
               ),
             },
             {
@@ -65,15 +125,6 @@ export function PontoInteligente() {
                 </>
               ),
             },
-            {
-              title: "Auditoria de biometria",
-              body: (
-                <p>
-                  Toda tentativa de validação facial — aprovada ou não — é registrada com o grau
-                  de similaridade e o motivo, permitindo investigação posterior.
-                </p>
-              ),
-            },
           ]}
         />
       </Section>
@@ -81,8 +132,9 @@ export function PontoInteligente() {
       <Section label="Arquitetura" title="Da selfie ao registro auditado">
         <FlowDiagram
           steps={[
-            "Selfie + GPS",
-            "face-api.js (client-side)",
+            "Selfie + GPS (com checagem de precisão)",
+            "Detecção + checagem de qualidade",
+            "face-api.js (descritor, client-side)",
             "Validação de geofence",
             "Supabase (RLS)",
             "Registro auditado",

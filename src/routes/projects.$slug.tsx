@@ -3,12 +3,12 @@ import { createFileRoute, notFound, useRouter, Link } from "@tanstack/react-rout
 import { Layout } from "@/components/Layout";
 import { projects } from "@/lib/projects";
 import { PitaIA } from "@/components/projects/PitaIA";
-import { DueCheck } from "@/components/projects/DueCheck";
+import { ChecagemDeRisco } from "@/components/projects/ChecagemDeRisco";
 import { PontoInteligente } from "@/components/projects/PontoInteligente";
 
 const content: Record<string, ComponentType> = {
   pitaia: PitaIA,
-  "due-check": DueCheck,
+  "checagem-de-risco": ChecagemDeRisco,
   "ponto-inteligente": PontoInteligente,
 };
 
