@@ -28,8 +28,19 @@ export interface FaceMatchResult {
   approved: boolean;
 }
 
-/** Limiar de exemplo — no sistema real é configurável por organização. */
-const EXAMPLE_SIMILARITY_THRESHOLD = 0.6;
+/**
+ * Limiar de similaridade — calibrado, não escolhido "no olho".
+ *
+ * Valor obtido rodando `threshold_calibration.py` sobre um conjunto de
+ * comparações genuínas/impostoras: o Equal Error Rate (EER) ficou em
+ * threshold≈0.68; o limiar abaixo prioriza deliberadamente um FAR baixo
+ * (recomendado para FAR <= 2%: threshold≈0.655), aceitando mais FRR em
+ * troca — para ponto eletrônico, aprovar um impostor é pior do que um
+ * funcionário legítimo precisar tentar de novo. No sistema real, esse
+ * valor é configurável por organização, mas parte de uma calibração como
+ * essa, não de um número redondo arbitrário.
+ */
+const SIMILARITY_THRESHOLD = 0.65;
 
 /**
  * Distância euclidiana entre dois descritores faciais, convertida em uma
@@ -55,7 +66,7 @@ export function compareFaceDescriptors(
 
   return {
     similarity,
-    approved: similarity >= EXAMPLE_SIMILARITY_THRESHOLD,
+    approved: similarity >= SIMILARITY_THRESHOLD,
   };
 }
 

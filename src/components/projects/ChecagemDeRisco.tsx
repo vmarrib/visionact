@@ -4,6 +4,7 @@ import { FlowDiagram } from "@/components/FlowDiagram";
 import { TechStack } from "@/components/TechStack";
 import { FeatureCards, BulletList } from "@/components/FeatureCards";
 import { CodeBlock } from "@/components/CodeBlock";
+import { RiskCheckDemo } from "./RiskCheckDemo";
 import { projects } from "@/lib/projects";
 
 const meta = projects.find((p) => p.slug === "checagem-de-risco")!;
@@ -20,6 +21,16 @@ export function ChecagemDeRisco() {
         stack={meta.stack}
         github={meta.github}
       />
+
+      <Section label="Demo" title="Uma checagem individual, rodando de verdade">
+        <p className="mb-4 text-muted-foreground">
+          O pipeline PySpark abaixo é para lote (uma carteira inteira de contrapartes). Esta caixa
+          é uma versão simplificada — <strong>uma contraparte por vez</strong>, sem Spark — usando
+          apenas a BrasilAPI como fonte, exatamente para você conferir o resultado real de uma
+          consulta, não uma simulação.
+        </p>
+        <RiskCheckDemo />
+      </Section>
 
       <Section label="Escala" title="Por que PySpark, e não um script sequencial">
         <p className="text-muted-foreground">

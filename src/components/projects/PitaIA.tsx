@@ -18,6 +18,7 @@ export function PitaIA() {
         problem="Dados de saúde ficam espalhados entre apps de treino, sono, humor, exames e ciclo menstrual — e o acompanhamento entre paciente e profissional (psicólogo, trainer) é descontínuo. O PitaIA unifica esse histórico num só lugar e usa IA com contexto real do usuário para gerar insights, respeitando limites claros sobre o que pode ser compartilhado."
         stack={meta.stack}
         github={meta.github}
+        liveUrl="https://apitaia.com"
       />
 
       <Section label="Modelagem de acesso" title="RLS multi-papel, não só autenticação">

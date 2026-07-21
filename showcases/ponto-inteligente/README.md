@@ -1,9 +1,11 @@
 # Ponto Inteligente — amostra de código
 
-> Amostra curada de decisões técnicas do Ponto Inteligente, um sistema de
-> ponto eletrônico com geofencing e verificação facial. Limiares de negócio
-> específicos de cliente, nomes reais de local e dados biométricos foram
-> omitidos — o objetivo é mostrar a arquitetura, não o schema de produção.
+> Amostra curada de decisões técnicas de uma plataforma de **gestão de
+> jornada de trabalho** — não só "bater ponto", mas confirmar presença,
+> rastrear jornada em tempo real e gerar evidência auditável dela. Limiares
+> de negócio específicos de cliente, nome real da empresa e das plantas, e
+> qualquer dado biométrico foram omitidos — o objetivo é mostrar a
+> arquitetura e a metodologia de calibração, não o schema de produção.
 
 ## Contexto do projeto
 
@@ -37,6 +39,77 @@ processo real de chão de fábrica:
   dias antes de expandir para as demais, com uma rotina explícita de
   recolher feedback dos supervisores de turno sobre falsos negativos
   (funcionário reprovado indevidamente) antes de qualquer expansão.
+- **Onboarding com consentimento explícito**: cadastro pelo admin (nome,
+  cargo, locais autorizados, foto de referência) → usuário recebe magic
+  link temporário → **tela bloqueante de troca de senha** → **tela
+  bloqueante de aceite do termo de geolocalização** (sem aceite explícito,
+  o app não libera o bate-ponto) → vínculo do dispositivo (fingerprint)
+  associado ao usuário, para dificultar um funcionário bater ponto de um
+  aparelho que não é o seu. Só depois disso o dashboard é liberado.
+
+## Visão computacional embarcada — o pipeline de 3 estágios
+
+O reconhecimento facial roda inteiramente no navegador do funcionário, sem
+nenhuma API de biometria em nuvem — três modelos leves em sequência:
+
+| Estágio | Modelo | Tamanho | O que faz |
+|---|---|---|---|
+| 1 | `TinyFaceDetector` | ~190 KB | Detecta o rosto na imagem e define a bounding box, com score de confiança |
+| 2 | `FaceLandmark68Net` | ~350 KB | Marca 68 pontos anatômicos (olhos, nariz, boca, contorno) e alinha o rosto |
+| 3 | `FaceRecognitionNet` | ~6,2 MB | Converte o rosto alinhado num vetor de 128 números (embedding) para comparação |
+
+Rodar isso no celular do funcionário, em vez de uma API de nuvem, muda a
+estrutura de custo de **variável por verificação** para **fixa (zero)**:
+para uma operação de referência de ~20 colaboradores e ~80 batidas/dia, uma
+API paga de comparação facial custaria algo entre R$130 e R$200/mês; local,
+o custo de biometria é R$ 0 — o único custo recorrente é a infraestrutura
+do servidor em si, independente do volume de batidas.
+
+## Validação estatística — calibrando limiares como cientista de dados, não "no olho"
+
+A parte mais fácil de fazer errado num sistema biométrico é escolher um
+número redondo para o limiar de decisão sem justificar por quê. Este
+showcase inclui a metodologia de calibração usada — rodável e testada,
+ainda que com dados simulados (nenhum dado biométrico ou de localização
+real de funcionário aparece aqui):
+
+**Reconhecimento facial — FAR, FRR e Equal Error Rate**
+`threshold_calibration.py` gera um conjunto simulado de comparações
+"genuínas" (mesma pessoa) e "impostoras" (pessoas diferentes), calcula, para
+cada limiar candidato:
+- **FAR (False Accept Rate)** — fração de impostores que o limiar aprovaria;
+- **FRR (False Reject Rate)** — fração de genuínos que o limiar reprovaria;
+
+e encontra o **Equal Error Rate** (o ponto onde as duas taxas se cruzam —
+métrica padrão para comparar sistemas biométricos). Rodando o script:
+
+```
+EER: threshold=0.680 far=0.014 frr=0.012
+Limiar recomendado (FAR <= 2%): threshold=0.655 far=0.020 frr=0.004
+```
+
+O limiar usado em `face-match-client.ts` (0.65) não é o EER — é
+deliberadamente próximo dele, mas escolhido para manter o FAR baixo mesmo à
+custa de mais FRR: para ponto eletrônico, aprovar um impostor (fraude) é
+pior do que um funcionário legítimo precisar tentar de novo.
+
+**Geolocalização — calibração do raio por percentil empírico**
+`geofence_calibration.py` aplica a mesma lógica usada para definir SLOs de
+latência em engenharia de confiabilidade, só que para erro de
+posicionamento: coleta (simulada) de leituras de GPS num ponto conhecido,
+calcula a distância de cada leitura até o ponto verdadeiro, e recomenda o
+raio como o **percentil** da distribuição observada — não uma regra de
+desvio-padrão, porque erro de GPS não é simetricamente distribuído.
+
+```
+Raio para aceitar 50% das leituras legítimas: 28.8 m
+Raio para aceitar 90% das leituras legítimas: 55.8 m
+Raio para aceitar 95% das leituras legítimas: 61.3 m
+Raio para aceitar 99% das leituras legítimas: 74.3 m
+```
+
+Os 48 testes deste showcase (18 em Python + 30 em Vitest, ver seção de
+arquivos) — os de Python foram rodados de verdade, com `pytest`.
 
 ## Decisões técnicas e alternativas consideradas
 
@@ -60,13 +133,10 @@ sustentar a decisão, em vez de confiar cegamente em qualquer coordenada
 retornada.
 
 **3. Reconhecimento facial 100% client-side, não uma API de biometria em nuvem**
-A alternativa mais comum é enviar a selfie para uma API de terceiros que
-retorna "é a mesma pessoa? sim/não". Isso tem dois custos: dinheiro (cobrança
-por verificação) e privacidade (a foto trafega para fora do controle da
-aplicação). Rodando o modelo de detecção/comparação facial no navegador do
-próprio usuário, nenhuma imagem biométrica sai do dispositivo até a decisão
-já estar tomada — só o resultado (similaridade, aprovado/reprovado) é
-enviado ao servidor. Ver `face-match-client.ts` e `face-match-pipeline.ts`.
+Ver seção de visão computacional acima — além do custo zero, nenhuma
+imagem biométrica sai do dispositivo até a decisão já estar tomada; só o
+resultado (similaridade, aprovado/reprovado) é enviado ao servidor. Ver
+`face-match-client.ts` e `face-match-pipeline.ts`.
 
 **4. Checagem de qualidade antes de extrair o descritor facial**
 Detectar mais de um rosto no quadro, confiança de detecção baixa, ou um
@@ -94,7 +164,8 @@ registrada com o grau de similaridade e o motivo da decisão.
 
 TypeScript, reconhecimento facial client-side (baseado em modelos que rodam
 via TensorFlow.js no navegador), Geolocation API nativa, PostgreSQL (Row
-Level Security), Vitest para os testes.
+Level Security), Python para a calibração estatística offline, Vitest e
+pytest para os testes.
 
 ## Arquivos
 
@@ -103,31 +174,43 @@ Level Security), Vitest para os testes.
 - [`geolocation.ts`](./geolocation.ts) — obtenção de posição via Geolocation
   API nativa, com checagem de precisão da leitura.
 - [`face-match-client.ts`](./face-match-client.ts) — comparação de
-  descritores faciais já extraídos, com pré-aquecimento de modelo.
+  descritores faciais já extraídos, com limiar calibrado e pré-aquecimento
+  de modelo.
 - [`face-match-pipeline.ts`](./face-match-pipeline.ts) — pipeline completo:
   detecção, checagem de qualidade, cadastro de referência e verificação ao
   vivo.
 - [`rls-audit.sql`](./rls-audit.sql) — RLS multi-papel e tabela de auditoria
   de tentativas de verificação.
+- [`threshold_calibration.py`](./threshold_calibration.py) — calibração do
+  limiar de FaceMatch via FAR/FRR/Equal Error Rate.
+- [`geofence_calibration.py`](./geofence_calibration.py) — calibração do
+  raio de geofence via percentil empírico de erro de GPS observado.
 - [`geofence.test.ts`](./geofence.test.ts),
   [`geolocation.test.ts`](./geolocation.test.ts),
   [`face-match-client.test.ts`](./face-match-client.test.ts),
-  [`face-match-pipeline.test.ts`](./face-match-pipeline.test.ts) — testes
-  (sintaxe Vitest) cobrindo distância geográfica, confiabilidade de
-  leitura de GPS, comparação de descritores e checagem de qualidade
-  facial. As coordenadas de teste usam um valor de referência calculado e
-  verificado de forma independente (ver comentário em `geofence.test.ts`),
-  não um número "chutado".
+  [`face-match-pipeline.test.ts`](./face-match-pipeline.test.ts) — 30
+  testes Vitest cobrindo distância geográfica, confiabilidade de leitura de
+  GPS, comparação de descritores e checagem de qualidade facial.
+- [`test_threshold_calibration.py`](./test_threshold_calibration.py),
+  [`test_geofence_calibration.py`](./test_geofence_calibration.py) — 18
+  testes pytest cobrindo a calibração estatística, **rodados e verificados
+  neste repositório**.
 
 ## Como rodar os testes
 
 ```bash
+# Testes de calibração estatística (Python) — rodam de verdade agora:
+pip install pytest
+pytest showcases/ponto-inteligente -v
+
+# Testes do app (TypeScript) — precisam de Node:
 npm install --save-dev vitest
 npx vitest run
 ```
 
 ## O que foi omitido em relação ao projeto real
 
-O nome real do cliente e das plantas, o limiar de similaridade e o raio de
-geofence configurados em produção, e qualquer selfie ou coordenada real de
-funcionário.
+O nome real do cliente e das plantas, o raio de geofence e o limiar de
+similaridade efetivamente configurados em produção (os valores aqui são
+calibrados a partir de dados **simulados**, para ilustrar o método), e
+qualquer selfie ou coordenada real de funcionário.

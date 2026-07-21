@@ -9,6 +9,14 @@
 > carteira inteira de contrapartes de uma vez, não uma por vez pela tela de
 > um app.
 
+> **Demo ao vivo**: a página deste projeto no site do portfólio tem uma
+> versão simplificada e real (uma contraparte por vez, sem Spark, só
+> BrasilAPI) que roda de verdade contra a API pública — código em
+> `src/lib/risk-check-*.ts`, `src/lib/risk-check.functions.ts` e
+> `src/components/projects/RiskCheckDemo.tsx` na raiz do repositório
+> `visionact` (fora desta pasta `showcases/`, porque é parte do próprio site,
+> não uma amostra estática).
+
 ## Problema
 
 Antes de fechar negócio com um fornecedor, cliente ou terceiro, uma empresa

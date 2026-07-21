@@ -22,15 +22,16 @@ describe("compareFaceDescriptors", () => {
     expect(result.approved).toBe(true);
   });
 
-  it("aprova quando a similaridade está exatamente no limiar", () => {
-    // distância euclidiana de 0.4 -> similaridade 1 - 0.4 = 0.6, igual ao
-    // limiar de exemplo — o limite é inclusivo (>=), não exclusivo.
+  it("aprova quando a similaridade está exatamente no limiar calibrado (0.65)", () => {
+    // distância euclidiana de 0.35 -> similaridade 1 - 0.35 = 0.65, igual ao
+    // limiar calibrado em threshold_calibration.py — o limite é inclusivo
+    // (>=), não exclusivo.
     const a = descriptor(0);
-    const b = descriptor(0.4);
+    const b = descriptor(0.35);
 
     const result = compareFaceDescriptors(a, b);
 
-    expect(result.similarity).toBeCloseTo(0.6, 5);
+    expect(result.similarity).toBeCloseTo(0.65, 5);
     expect(result.approved).toBe(true);
   });
 

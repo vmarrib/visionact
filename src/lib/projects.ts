@@ -39,11 +39,11 @@ export const projects: ProjectMeta[] = [
     slug: "ponto-inteligente",
     index: "03",
     name: "Ponto Inteligente",
-    tagline: "Ponto eletrônico sob encomenda para indústria de alimentos",
+    tagline: "Gestão de jornada com geolocalização e visão computacional",
     description:
-      "Sistema de ponto construído sob encomenda para uma indústria de alimentos: geofencing calculado via Haversine e verificação facial 100% client-side (sem custo de API de biometria em nuvem), com auditoria completa de cada tentativa de validação.",
+      "Plataforma de gestão de jornada construída sob encomenda para uma indústria de alimentos: geofencing e reconhecimento facial 100% client-side, com limiares calibrados estatisticamente (FAR/FRR/Equal Error Rate para biometria, percentil empírico para o raio de GPS) em vez de escolhidos no olho.",
     domain: "Data Engineering · Applied AI",
-    stack: ["React", "TanStack Start", "Supabase", "PostgreSQL", "Row Level Security", "face-api.js"],
+    stack: ["React", "TanStack Start", "Supabase", "PostgreSQL", "Row Level Security", "face-api.js", "Python"],
     accent: "Field workforce",
     github: "https://github.com/vmarrib/visionact/tree/main/showcases/ponto-inteligente",
   },
@@ -53,7 +53,7 @@ export const profile = {
   name: "Vanessa M. Ribeiro",
   role: "Engenheira & Cientista de Dados",
   summary:
-    "Construo sistemas de dados de ponta a ponta para domínios sensíveis do mundo real — saúde, compliance e biometria — com modelagem de acesso rigorosa (Row Level Security não-trivial) desde o design do schema. Três projetos em produção: unificação de dados de saúde com IA de contexto, due diligence B2B integrando múltiplas fontes públicas de risco, e controle de ponto com geofencing e reconhecimento facial.",
+    "Construo sistemas de dados de ponta a ponta para domínios sensíveis do mundo real — saúde, compliance e biometria — com modelagem de acesso rigorosa (Row Level Security não-trivial) desde o design do schema. Três projetos em produção: unificação de dados de saúde com IA de contexto, due diligence B2B integrando múltiplas fontes públicas de risco, e gestão de jornada com geolocalização e visão computacional calibradas estatisticamente.",
   email: "contato@visionact.org",
   phone: "+55 48 99167-4257",
   github: "https://github.com/vmarrib/visionact",
