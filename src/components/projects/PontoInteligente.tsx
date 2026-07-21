@@ -29,7 +29,7 @@ export function PontoInteligente() {
         name={meta.name}
         tagline={meta.tagline}
         domain={meta.domain}
-        problem="Construído sob encomenda, com exclusividade, para uma indústria de alimentos com múltiplas plantas e turnos de produção: uma plataforma de gestão de jornada que confirma que a pessoa está fisicamente no local autorizado e que é de fato ela batendo o ponto, num contexto onde o cliente já enfrentava disputas trabalhistas por registro de jornada inconfiável."
+        problem="Equipes que trabalham em múltiplos locais e turnos precisam de uma prova confiável de presença — mas digitais se desgastam com trabalho manual, crachás podem ser emprestados, e papel não resiste a uma disputa trabalhista. Gerir jornada de verdade exige confirmar, na mesma batida, que a pessoa está fisicamente no local autorizado e que é de fato ela quem está ali, com uma trilha auditável de cada tentativa — aprovada ou não."
         stack={meta.stack}
         github={meta.github}
       />
