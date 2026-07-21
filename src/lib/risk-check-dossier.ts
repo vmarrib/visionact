@@ -2,9 +2,9 @@
  * Checagem de Risco (demo ao vivo) — schema da BrasilAPI e curadoria do dossiê.
  *
  * Este é "o código que determina os campos do dossiê": a resposta bruta da
- * BrasilAPI tem dezenas de campos (CNAEs secundários, endereço completo,
- * telefones, dados de representante legal...). `buildDossierFields` decide
- * explicitamente quais campos aparecem no dossiê final — curadoria, não um
+ * BrasilAPI tem dezenas de campos (endereço completo, telefones, dados de
+ * representante legal...). As funções abaixo decidem explicitamente quais
+ * campos aparecem no dossiê final e como são agrupados — curadoria, não um
  * dump da resposta inteira da API.
  */
 
@@ -28,19 +28,46 @@ export const BrasilApiCnpjSchema = z.object({
   data_inicio_atividade: z.string(),
   descricao_porte: z.string().nullable().optional(),
   capital_social: z.number(),
+  cnae_fiscal: z.number().nullable().optional(),
   cnae_fiscal_descricao: z.string().nullable().optional(),
+  cnaes_secundarios: z
+    .array(z.object({ codigo: z.number(), descricao: z.string() }))
+    .nullable()
+    .optional(),
   municipio: z.string().nullable().optional(),
   uf: z.string().nullable().optional(),
   opcao_pelo_simples: z.boolean().nullable().optional(),
   opcao_pelo_mei: z.boolean().nullable().optional(),
-  qsa: z.array(z.object({ nome_socio: z.string() })).nullable().optional(),
+  qsa: z
+    .array(z.object({ nome_socio: z.string(), qualificacao_socio: z.string().nullable().optional() }))
+    .nullable()
+    .optional(),
 });
 
 export type BrasilApiCnpjResponse = z.infer<typeof BrasilApiCnpjSchema>;
 
-export interface DossierField {
-  label: string;
-  value: string;
+export interface CompanyProfile {
+  cnpj: string;
+  razaoSocial: string;
+  nomeFantasia: string;
+  situacaoCadastral: string;
+  dataSituacaoCadastral: string;
+  dataInicioAtividade: string;
+  porte: string;
+  capitalSocial: string;
+  municipio: string;
+  uf: string;
+  optanteSimples: boolean;
+}
+
+export interface CnaeInfo {
+  codigo: string;
+  descricao: string;
+}
+
+export interface Partner {
+  nome: string;
+  qualificacao: string | null;
 }
 
 function formatBrDate(date: string | null | undefined): string {
@@ -54,28 +81,54 @@ function formatBRL(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+/** Dados cadastrais básicos — a metade "quem é a empresa" do dossiê. */
+export function buildCompanyProfile(data: BrasilApiCnpjResponse): CompanyProfile {
+  return {
+    cnpj: formatCnpj(data.cnpj),
+    razaoSocial: data.razao_social,
+    nomeFantasia: data.nome_fantasia || "—",
+    situacaoCadastral: data.descricao_situacao_cadastral,
+    dataSituacaoCadastral: formatBrDate(data.data_situacao_cadastral),
+    dataInicioAtividade: formatBrDate(data.data_inicio_atividade),
+    porte: data.descricao_porte || "—",
+    capitalSocial: formatBRL(data.capital_social),
+    municipio: data.municipio || "—",
+    uf: data.uf || "—",
+    optanteSimples: Boolean(data.opcao_pelo_simples),
+  };
+}
+
 /**
- * Decide quais campos da resposta da BrasilAPI compõem o dossiê exibido ao
- * usuário, e em que formato/ordem — a mesma informação bruta poderia virar
- * um dossiê bem diferente dependendo do que a organização considera
- * relevante (ex.: um dossiê de crédito destacaria capital social; um de
- * compliance destacaria situação cadastral e quadro societário).
+ * CNAEs (principal + secundários) — pedido explicitamente no plural: uma
+ * empresa quase sempre declara mais de uma atividade econômica, e um dossiê
+ * que mostra só o CNAE principal esconde atividades secundárias que também
+ * importam para avaliação de risco (ex.: uma empresa de alimentos que
+ * também declara atividade financeira secundária).
  */
-export function buildDossierFields(data: BrasilApiCnpjResponse): DossierField[] {
-  return [
-    { label: "CNPJ", value: formatCnpj(data.cnpj) },
-    { label: "Razão social", value: data.razao_social },
-    { label: "Nome fantasia", value: data.nome_fantasia || "—" },
-    { label: "Situação cadastral", value: data.descricao_situacao_cadastral },
-    { label: "Data da situação cadastral", value: formatBrDate(data.data_situacao_cadastral) },
-    { label: "Início de atividade", value: formatBrDate(data.data_inicio_atividade) },
-    { label: "Porte", value: data.descricao_porte || "—" },
-    { label: "Capital social", value: formatBRL(data.capital_social) },
-    { label: "Atividade principal", value: data.cnae_fiscal_descricao || "—" },
-    { label: "Município / UF", value: `${data.municipio ?? "—"} / ${data.uf ?? "—"}` },
-    { label: "Optante pelo Simples Nacional", value: data.opcao_pelo_simples ? "Sim" : "Não" },
-    { label: "Sócios registrados (QSA)", value: String(data.qsa?.length ?? 0) },
-  ];
+export function buildCnaes(data: BrasilApiCnpjResponse): { principal: CnaeInfo; secundarios: CnaeInfo[] } {
+  return {
+    principal: {
+      codigo: data.cnae_fiscal != null ? String(data.cnae_fiscal) : "—",
+      descricao: data.cnae_fiscal_descricao || "—",
+    },
+    secundarios: (data.cnaes_secundarios ?? []).map((c) => ({
+      codigo: String(c.codigo),
+      descricao: c.descricao,
+    })),
+  };
+}
+
+/**
+ * Quadro societário nominal — pedido explicitamente por nome, não só a
+ * contagem: para due diligence, QUEM são os sócios é o dado relevante, a
+ * contagem sozinha (usada como sinal de risco em `risk-check-rules.ts`) não
+ * substitui mostrar os nomes no dossiê.
+ */
+export function buildPartners(data: BrasilApiCnpjResponse): Partner[] {
+  return (data.qsa ?? []).map((s) => ({
+    nome: s.nome_socio,
+    qualificacao: s.qualificacao_socio ?? null,
+  }));
 }
 
 /**

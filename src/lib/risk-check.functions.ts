@@ -16,21 +16,33 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { isValidCnpj, onlyDigits } from "./risk-check-cnpj";
-import { BrasilApiCnpjSchema, buildDossierFields, extractSignals, type DossierField } from "./risk-check-dossier";
-import { evaluateRules, type FlaggedRule, type Recommendation } from "./risk-check-rules";
+import {
+  BrasilApiCnpjSchema,
+  buildCnaes,
+  buildCompanyProfile,
+  buildPartners,
+  extractSignals,
+  type CnaeInfo,
+  type CompanyProfile,
+  type Partner,
+} from "./risk-check-dossier";
+import { evaluateRules, type Recommendation, type RuleEvaluation } from "./risk-check-rules";
 
 const BRASIL_API_CNPJ_ENDPOINT = "https://brasilapi.com.br/api/cnpj/v1";
 
 export type RiskCheckResult =
   | { status: "invalid_cnpj" }
   | { status: "not_found" }
+  | { status: "rate_limited" }
   | { status: "upstream_error"; message: string }
   | {
       status: "ok";
-      dossier: DossierField[];
+      company: CompanyProfile;
+      cnaes: { principal: CnaeInfo; secundarios: CnaeInfo[] };
+      partners: Partner[];
       score: number;
       recommendation: Recommendation;
-      flaggedRules: FlaggedRule[];
+      rules: RuleEvaluation[];
     };
 
 export const checkCnpjRisk = createServerFn({ method: "POST" })
@@ -51,6 +63,12 @@ export const checkCnpjRisk = createServerFn({ method: "POST" })
       return { status: "upstream_error", message: "Não foi possível conectar à BrasilAPI." };
     }
 
+    if (response.status === 429) {
+      // Limite de requisições da BrasilAPI (API pública gratuita, sem
+      // chave) — não é um bug da demo, é o provedor pedindo para esperar.
+      return { status: "rate_limited" };
+    }
+
     if (response.status === 404) {
       return { status: "not_found" };
     }
@@ -66,15 +84,16 @@ export const checkCnpjRisk = createServerFn({ method: "POST" })
       return { status: "upstream_error", message: "Resposta da BrasilAPI em formato inesperado." };
     }
 
-    const dossier = buildDossierFields(parsed.data);
     const signals = extractSignals(parsed.data);
     const assessment = evaluateRules(signals);
 
     return {
       status: "ok",
-      dossier,
+      company: buildCompanyProfile(parsed.data),
+      cnaes: buildCnaes(parsed.data),
+      partners: buildPartners(parsed.data),
       score: assessment.score,
       recommendation: assessment.recommendation,
-      flaggedRules: assessment.flaggedRules,
+      rules: assessment.rules,
     };
   });
