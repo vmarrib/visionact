@@ -54,7 +54,8 @@ export const profile = {
   role: "Engenheira & Cientista de Dados",
   summary:
     "Construo sistemas de dados de ponta a ponta para domínios sensíveis do mundo real — saúde, compliance e biometria — com modelagem de acesso rigorosa (Row Level Security não-trivial) desde o design do schema. Três projetos em produção: unificação de dados de saúde com IA de contexto, due diligence B2B integrando múltiplas fontes públicas de risco, e controle de ponto com geofencing e reconhecimento facial.",
-  email: "vanessamarrib@gmail.com",
-  github: "https://github.com/vmarrib",
+  email: "contato@visionact.org",
+  phone: "+55 48 99167-4257",
+  github: "https://github.com/vmarrib/visionact",
   linkedin: "https://www.linkedin.com/in/vanessamarrib/",
 };

@@ -52,8 +52,9 @@ export function ChecagemDeRisco() {
               body: (
                 <p>
                   Não é um bureau: varre a web por menções à contraparte e sinaliza
-                  correspondências contra uma lista configurável de palavras-chave de risco —
-                  tratado como sinal de intensidade, nunca como veto automático isolado.
+                  correspondências contra uma lista configurável de palavras-chave. A intensidade
+                  do sinal é proporcional ao número de artigos corroborantes — uma menção isolada
+                  pesa menos que três reportagens independentes sobre o mesmo assunto.
                 </p>
               ),
             },
@@ -93,6 +94,17 @@ recommendation    string   -- approve | manual_review | reject
 generated_at      timestamp
 rule_version      string`}
         />
+      </Section>
+
+      <Section label="Testabilidade" title="Lógica de negócio testável sem cluster">
+        <p className="text-muted-foreground">
+          Cada módulo separa a lógica pura (retry, normalização de texto, avaliação de regras) da
+          integração com Spark (`mapPartitions`, `DataFrame`, UDFs) — a primeira nunca importa
+          PySpark. Resultado: 29 testes cobrindo cada decisão de negócio (o que conta como
+          "não encontrado" vs. "fonte fora do ar", saturação da intensidade de mídia, veto vs.
+          score ponderado) rodam com <code className="text-xs">pytest</code> puro, em segundos,
+          sem precisar subir Spark nem Java.
+        </p>
       </Section>
 
       <Section label="Arquitetura" title="Do lote ao dossiê">

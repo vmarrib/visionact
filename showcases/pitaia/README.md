@@ -56,19 +56,42 @@ instrumento, modelei cada um como dado (perguntas, pesos, itens invertidos) e
 escrevi um motor de scoring único que interpreta esse dado — adicionar um
 novo instrumento não exige escrever lógica nova, só descrever seus metadados.
 
+**6. Tendência calculada em código, não deixada para o LLM inferir**
+Além de listar os check-ins brutos, o contexto inclui um resumo de
+tendência (`computeTrendSummary`): a janela é dividida em duas metades
+cronológicas e a média de humor/energia de cada metade é comparada. Uma
+afirmação como "sua energia caiu" é exatamente o tipo de frase que não
+deveria depender do modelo somar e comparar números corretamente a partir
+de texto solto — calculá-la em código determinístico garante que está
+certa antes mesmo de chegar ao prompt. Uma variação pequena (abaixo de um
+limiar de ruído) é reportada como "estável", não como tendência real.
+
 ## Stack
 
 TypeScript, PostgreSQL (Row Level Security), Edge Functions (Deno),
-Anthropic Claude API, Zod para validação de entrada/saída.
+Anthropic Claude API, Zod para validação de entrada/saída, Vitest para os
+testes.
 
 ## Arquivos
 
 - [`rls-policies.sql`](./rls-policies.sql) — políticas de RLS multi-papel com
   função `SECURITY DEFINER` anti-recursão, e isolamento do diário pessoal.
 - [`ai-context-service.ts`](./ai-context-service.ts) — construção do contexto
-  para o LLM e persistência incremental da resposta via streaming.
+  para o LLM (incluindo cálculo de tendência) e persistência incremental da
+  resposta via streaming.
 - [`clinical-scoring.ts`](./clinical-scoring.ts) — motor de scoring
   declarativo para instrumentos clínicos validados.
+- [`ai-context-service.test.ts`](./ai-context-service.test.ts),
+  [`clinical-scoring.test.ts`](./clinical-scoring.test.ts) — testes
+  (sintaxe Vitest) cobrindo janela de contexto, cálculo de tendência e
+  scoring de instrumentos, cada um documentando qual comportamento protege.
+
+## Como rodar os testes
+
+```bash
+npm install --save-dev vitest
+npx vitest run
+```
 
 ## O que foi omitido em relação ao projeto real
 

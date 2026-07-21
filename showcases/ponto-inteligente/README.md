@@ -94,7 +94,7 @@ registrada com o grau de similaridade e o motivo da decisão.
 
 TypeScript, reconhecimento facial client-side (baseado em modelos que rodam
 via TensorFlow.js no navegador), Geolocation API nativa, PostgreSQL (Row
-Level Security).
+Level Security), Vitest para os testes.
 
 ## Arquivos
 
@@ -109,6 +109,22 @@ Level Security).
   vivo.
 - [`rls-audit.sql`](./rls-audit.sql) — RLS multi-papel e tabela de auditoria
   de tentativas de verificação.
+- [`geofence.test.ts`](./geofence.test.ts),
+  [`geolocation.test.ts`](./geolocation.test.ts),
+  [`face-match-client.test.ts`](./face-match-client.test.ts),
+  [`face-match-pipeline.test.ts`](./face-match-pipeline.test.ts) — testes
+  (sintaxe Vitest) cobrindo distância geográfica, confiabilidade de
+  leitura de GPS, comparação de descritores e checagem de qualidade
+  facial. As coordenadas de teste usam um valor de referência calculado e
+  verificado de forma independente (ver comentário em `geofence.test.ts`),
+  não um número "chutado".
+
+## Como rodar os testes
+
+```bash
+npm install --save-dev vitest
+npx vitest run
+```
 
 ## O que foi omitido em relação ao projeto real
 

@@ -41,12 +41,13 @@ export function PitaIA() {
         <FeatureCards
           features={[
             {
-              title: "Contexto agregado",
+              title: "Contexto agregado + tendência calculada",
               body: (
                 <p>
                   Uma edge function monta o prompt agregando até 90 dias de check-ins, treinos,
-                  medidas e exames — com instrução explícita para a IA nunca inventar valores fora
-                  desse contexto.
+                  medidas e exames, e já inclui a tendência de humor/energia calculada em código
+                  (metade recente vs. anterior do período) — "sua energia caiu" nunca é uma
+                  inferência do modelo, é aritmética determinística feita antes do prompt.
                 </p>
               ),
             },

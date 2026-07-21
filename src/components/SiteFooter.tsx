@@ -13,6 +13,12 @@ export function SiteFooter() {
           <a href={`mailto:${profile.email}`} className="text-muted-foreground transition-colors hover:text-foreground">
             email
           </a>
+          <a
+            href={`tel:${profile.phone.replace(/\s|-/g, "")}`}
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {profile.phone}
+          </a>
           <a href={profile.github} target="_blank" rel="noreferrer" className="text-muted-foreground transition-colors hover:text-foreground">
             github
           </a>

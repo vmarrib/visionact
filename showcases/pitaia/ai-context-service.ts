@@ -68,6 +68,64 @@ export function buildHealthContext(
   };
 }
 
+export type TrendDirection = "melhorando" | "piorando" | "estavel";
+
+export interface MetricTrend {
+  metric: "mood" | "energy";
+  firstHalfAverage: number;
+  secondHalfAverage: number;
+  direction: TrendDirection;
+}
+
+/** Abaixo desta variação, a diferença é tratada como ruído, não tendência real. */
+const TREND_NOISE_THRESHOLD = 0.5;
+
+function average(values: number[]): number {
+  return values.reduce((sum, v) => sum + v, 0) / values.length;
+}
+
+/**
+ * Resume a evolução de humor/energia dentro da janela de contexto, em vez
+ * de deixar o LLM inferir uma tendência a partir de dezenas de linhas
+ * brutas.
+ *
+ * Por que pré-calcular isso em vez de só listar os check-ins crus?
+ * 1) Confiabilidade: "sua energia caiu nas últimas semanas" é uma
+ *    afirmação que queremos GARANTIR que está correta — calculá-la em
+ *    código determinístico é mais seguro do que confiar que o modelo vai
+ *    somar e comparar médias corretamente a partir de texto solto.
+ * 2) Custo: para uma janela de 90 dias, enviar só os check-ins brutos gasta
+ *    tokens proporcionalmente ao número de dias; enviar também um resumo
+ *    de tendência permite, no futuro, reduzir quantos check-ins brutos
+ *    precisam ser enviados (ex.: só a última semana + o resumo dos outros
+ *    83 dias) sem perder a informação de "para onde a métrica está indo".
+ *
+ * A janela é dividida ao meio cronologicamente (não por contagem de itens)
+ * — meses com mais ou menos check-ins registrados não deveriam distorcer
+ * qual metade é "recente".
+ */
+export function computeTrendSummary(checkins: CheckinRecord[]): MetricTrend[] {
+  if (checkins.length < 4) return []; // pouco dado para uma tendência ser confiável
+
+  const sorted = [...checkins].sort((a, b) => a.date.localeCompare(b.date));
+  const midpoint = Math.floor(sorted.length / 2);
+  const firstHalf = sorted.slice(0, midpoint);
+  const secondHalf = sorted.slice(midpoint);
+
+  const metrics: Array<{ key: "mood" | "energy" }> = [{ key: "mood" }, { key: "energy" }];
+
+  return metrics.map(({ key }) => {
+    const firstHalfAverage = average(firstHalf.map((c) => c[key]));
+    const secondHalfAverage = average(secondHalf.map((c) => c[key]));
+    const delta = secondHalfAverage - firstHalfAverage;
+
+    const direction: TrendDirection =
+      Math.abs(delta) < TREND_NOISE_THRESHOLD ? "estavel" : delta > 0 ? "melhorando" : "piorando";
+
+    return { metric: key, firstHalfAverage, secondHalfAverage, direction };
+  });
+}
+
 /**
  * Serializa o contexto em texto simples para o prompt.
  *
@@ -85,7 +143,18 @@ export function serializeContextForPrompt(context: UserHealthContext): string {
     .map((w) => `${w.date} | ${w.type} esforço=${w.perceivedEffort ?? "n/d"}`)
     .join("\n");
 
+  const trends = computeTrendSummary(context.checkins);
+  const trendLines = trends
+    .map(
+      (t) =>
+        `${t.metric}: ${t.firstHalfAverage.toFixed(1)} -> ${t.secondHalfAverage.toFixed(1)} (${t.direction})`,
+    )
+    .join("\n");
+
   return [
+    "## Tendência calculada (primeira metade vs. segunda metade do período)",
+    trendLines || "(dados insuficientes para calcular tendência)",
+    "",
     "## Check-ins recentes",
     checkinLines || "(sem registros no período)",
     "",

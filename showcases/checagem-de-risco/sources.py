@@ -8,7 +8,7 @@ paralelismo e tratamento de falha parcial, que é a mesma usada em produção
 (ali implementada em TypeScript com Promise.allSettled; aqui expressa em
 PySpark para o cenário de checagem em lote).
 
-Decisão de arquitetura: por que mapPartitions e não um UDF comum?
+Decisão de arquitetura, parte 1 — por que mapPartitions e não um UDF comum?
 
 Um UDF do Spark roda uma vez POR LINHA. Se cada linha abrir sua própria
 conexão HTTP, um lote de 10.000 contrapartes abre 10.000 conexões —
@@ -18,31 +18,25 @@ POR PARTIÇÃO: a conexão (ou sessão HTTP com keep-alive) é criada uma vez no
 início da partição e reaproveitada para todas as linhas dali, com o
 paralelismo vindo do número de partições processadas simultaneamente pelo
 cluster, não do número de linhas.
+
+Decisão de arquitetura, parte 2 — por que PySpark só é importado DENTRO das
+funções que o usam, e não no topo do arquivo?
+
+`_query_source_with_retry` é a parte que importa de verdade revisar num code
+review: é ela que decide o que conta como "não encontrado" vs "fonte fora
+do ar", e é ela que tem casos de borda (timeout, retry, códigos HTTP
+inesperados) que merecem teste unitário. Ela não usa NADA do PySpark — só
+`time` e o `session` que recebe por parâmetro. Colocando o `import pyspark`
+apenas dentro de `fetch_structured_signals` (que só existe para orquestrar
+Spark), esta função pura continua importável e testável com pytest comum,
+sem precisar de um cluster Spark instalado só para rodar `pytest`.
 """
 
 from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import Iterator
-
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.types import StringType, StructField, StructType
-
-# ---------------------------------------------------------------------------
-# Schema comum de sinal — o MESMO formato usado por sources.py e por
-# media_check.py, para que rules_engine.py nunca precise saber de onde um
-# sinal veio.
-# ---------------------------------------------------------------------------
-SIGNAL_SCHEMA = StructType(
-    [
-        StructField("document_id", StringType(), nullable=False),
-        StructField("signal_id", StringType(), nullable=False),
-        StructField("kind", StringType(), nullable=False),  # "structured" | "media"
-        StructField("status", StringType(), nullable=False),  # "hit" | "no_hit" | "unavailable"
-        StructField("detail", StringType(), nullable=True),
-    ]
-)
+from typing import Iterator, Protocol
 
 
 @dataclass(frozen=True)
@@ -70,13 +64,40 @@ EXAMPLE_SOURCES: list[StructuredSource] = [
 ]
 
 
-def _query_source_with_retry(session, source: StructuredSource, document_id: str) -> dict:
+class HttpResponse(Protocol):
+    """
+    Formato mínimo de resposta HTTP que `_query_source_with_retry` precisa —
+    descrito como Protocol (não importando `requests.Response` diretamente)
+    para que os testes possam passar um objeto fake sem precisar da
+    biblioteca `requests` instalada nem de rede real.
+    """
+
+    status_code: int
+
+    def json(self) -> dict: ...
+
+
+class HttpSession(Protocol):
+    def get(self, url: str, timeout: float) -> HttpResponse: ...
+
+
+def _query_source_with_retry(session: HttpSession, source: StructuredSource, document_id: str) -> dict:
     """
     Consulta uma fonte para um único documento, com retry exponencial.
 
     Isolar o retry aqui (e não no chamador) significa que uma falha
     transitória de rede em UMA linha de uma partição não precisa derrubar o
     processamento das outras linhas da mesma partição.
+
+    Regras de interpretação de resposta (documentadas aqui porque são o tipo
+    de detalhe que se perde se não for escrito):
+      - 200 com corpo `{"match": true|false}` → resultado definitivo.
+      - 403 ou 404 → tratado como "não encontrado", não como erro. Convenção
+        observada nas fontes reais: "não encontrado" às vezes vem como erro
+        de autorização, não como 200 vazio.
+      - Qualquer outro código, ou exceção de rede → tenta de novo com
+        backoff exponencial (0.5s, 1s, 2s, ...) até `max_retries`; esgotadas
+        as tentativas, o sinal final é "unavailable" com o motivo anexado.
     """
     last_error: Exception | None = None
 
@@ -89,15 +110,38 @@ def _query_source_with_retry(session, source: StructuredSource, document_id: str
             if response.status_code == 200:
                 return {"status": "hit" if response.json().get("match") else "no_hit", "detail": None}
             if response.status_code in (403, 404):
-                # Convenção observada nas fontes reais: "não encontrado" às
-                # vezes vem como erro de autorização, não como 200 vazio.
                 return {"status": "no_hit", "detail": None}
             last_error = RuntimeError(f"status inesperado: {response.status_code}")
         except Exception as exc:  # noqa: BLE001 - queremos capturar qualquer falha de rede aqui
             last_error = exc
-            time.sleep(0.5 * (2**attempt))
+            if attempt < source.max_retries:
+                time.sleep(0.5 * (2**attempt))
 
     return {"status": "unavailable", "detail": str(last_error)}
+
+
+def _to_signal_row(source: StructuredSource, document_id: str, result: dict) -> dict:
+    """
+    Converte o resultado de `_query_source_with_retry` para o schema comum
+    de sinal. Fontes estruturadas são binárias por natureza — uma resposta
+    "hit" tem confiança máxima (`intensity=1.0`), diferente de um sinal de
+    mídia, cuja confiança é proporcional ao número de artigos corroborantes.
+    """
+    return {
+        "document_id": document_id,
+        "signal_id": source.signal_id,
+        "kind": "structured",
+        "status": result["status"],
+        "intensity": 1.0 if result["status"] == "hit" else 0.0,
+        "detail": result["detail"],
+    }
+
+
+# ---------------------------------------------------------------------------
+# A partir daqui, tudo depende de PySpark — só usado por quem de fato roda o
+# pipeline num cluster (ou Spark local), não por quem só quer rodar
+# `pytest` sobre a lógica de `_query_source_with_retry` acima.
+# ---------------------------------------------------------------------------
 
 
 def _process_partition(source: StructuredSource):
@@ -113,24 +157,14 @@ def _process_partition(source: StructuredSource):
         try:
             for row in rows:
                 result = _query_source_with_retry(session, source, row.document_id)
-                yield {
-                    "document_id": row.document_id,
-                    "signal_id": source.signal_id,
-                    "kind": "structured",
-                    "status": result["status"],
-                    "detail": result["detail"],
-                }
+                yield _to_signal_row(source, row.document_id, result)
         finally:
             session.close()
 
     return process
 
 
-def fetch_structured_signals(
-    spark: SparkSession,
-    batch: DataFrame,
-    sources: list[StructuredSource] = EXAMPLE_SOURCES,
-) -> DataFrame:
+def fetch_structured_signals(spark, batch, sources: list[StructuredSource] = EXAMPLE_SOURCES):
     """
     Consulta todas as fontes estruturadas configuradas para o lote inteiro.
 
@@ -138,7 +172,9 @@ def fetch_structured_signals(
     resultados são unidos — falha em uma fonte não afeta as demais, e o
     dossiê final ainda é gerado com o que estiver disponível.
     """
-    all_signals: DataFrame | None = None
+    from signal_schema import SIGNAL_SCHEMA
+
+    all_signals = None
 
     for source in sources:
         partial = batch.select("document_id").rdd.mapPartitions(_process_partition(source))
