@@ -1,5 +1,6 @@
 {
-  "name": "tanstack_start_ts",
+  "name": "visionact",
+  "description": "Portfolio site and curated code showcases for Vanessa M. Ribeiro (Data Engineering).",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -9,7 +10,8 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "vitest run"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -72,6 +74,7 @@
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "vitest": "^3.2.0",
     "@vitejs/plugin-react": "^5.0.4",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.1",

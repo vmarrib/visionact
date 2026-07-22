@@ -203,9 +203,9 @@ pytest para os testes.
 pip install pytest
 pytest showcases/ponto-inteligente -v
 
-# Testes do app (TypeScript) — precisam de Node:
-npm install --save-dev vitest
-npx vitest run
+# Testes do app (TypeScript) — na raiz do repositório:
+bun install
+bun run test
 ```
 
 ## O que foi omitido em relação ao projeto real

@@ -88,9 +88,11 @@ testes.
 
 ## Como rodar os testes
 
+Na raiz do repositório (`vitest.config.ts` já cobre esta pasta):
+
 ```bash
-npm install --save-dev vitest
-npx vitest run
+bun install
+bun run test
 ```
 
 ## O que foi omitido em relação ao projeto real

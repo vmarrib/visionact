@@ -27,7 +27,11 @@ export function ChecagemDeRisco() {
           O pipeline PySpark abaixo é para lote (uma carteira inteira de contrapartes). Esta caixa
           é uma versão simplificada — <strong>uma contraparte por vez</strong>, sem Spark — usando
           apenas a BrasilAPI como fonte, exatamente para você conferir o resultado real de uma
-          consulta, não uma simulação.
+          consulta, não uma simulação. Construída em TypeScript (TanStack Start + Zod), com 39
+          testes Vitest cobrindo validação de CNPJ, curadoria do dossiê, avaliação de regras e o
+          cache de resultado — código em{" "}
+          <code className="rounded bg-secondary px-1 py-0.5 text-xs">src/lib/risk-check-*.ts</code>{" "}
+          na raiz do repositório (fora de <code className="rounded bg-secondary px-1 py-0.5 text-xs">showcases/</code>, por ser parte do próprio app).
         </p>
         <RiskCheckDemo />
       </Section>
@@ -82,8 +86,10 @@ export function ChecagemDeRisco() {
               title: "Regras como configuração",
               body: (
                 <p>
-                  Veto automático separado de score ponderado, descritos em YAML — reponderar uma
-                  regra é mudança de configuração, não de código.
+                  Veto automático separado de score ponderado — em YAML no pipeline PySpark
+                  (<code className="text-xs">rules_config.example.yaml</code>), em um objeto
+                  TypeScript comentado na demo acima (<code className="text-xs">risk-check-rules.ts</code>).
+                  Reponderar uma regra é mudança de configuração, não de lógica.
                 </p>
               ),
             },

@@ -31,7 +31,7 @@ export const projects: ProjectMeta[] = [
     description:
       "Pipeline PySpark que consulta múltiplas fontes de risco em lote (paralelizado, não uma contraparte por vez), aplica regras configuráveis — incluindo um checador de mídia adversa próprio, não um bureau — e gera um dossiê final com score e regras sinalizadas.",
     domain: "Data Engineering · Risk & Compliance",
-    stack: ["PySpark", "Python", "YAML", "Batch Processing"],
+    stack: ["PySpark", "Python", "YAML", "TypeScript", "Zod", "TanStack Start"],
     accent: "Regulatory grade",
     github: "https://github.com/vmarrib/visionact/tree/main/showcases/checagem-de-risco",
   },

@@ -99,6 +99,11 @@ export function PitaIA() {
           ]}
           caption="A edge function é o único ponto que agrega dados sensíveis antes de expô-los à IA — o client nunca monta esse contexto."
         />
+        <p className="mt-4 text-sm text-muted-foreground">
+          18 testes Vitest cobrem a janela de contexto, o cálculo de tendência e o scoring dos
+          instrumentos clínicos — cada função pura testável sem depender de Supabase ou da API do
+          Claude.
+        </p>
         <div className="mt-6">
           <p className="mb-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
             Tecnologias
