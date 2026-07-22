@@ -55,9 +55,13 @@ export interface FaceDetectionFailure {
   qualityIssue: FaceQualityIssue;
 }
 
-// Mesmos valores de showcases/ponto-inteligente/face-match-pipeline.ts —
-// não escolhidos de novo "no olho" para esta demo.
-const MIN_DETECTION_CONFIDENCE = 0.8;
+// O showcase (face-match-pipeline.ts) usa 0.8 — valor pensado para uma
+// captura curada, em condições controladas. Ao vivo, webcams reais em luz
+// de ambiente comum frequentemente pontuam o TinyFaceDetector entre 0.5 e
+// 0.8 mesmo com o rosto bem visível — 0.8 rejeitava capturas legítimas com
+// frequência demais para uma demo pública. Relaxado aqui de propósito;
+// divergência documentada, não silenciosa.
+const MIN_DETECTION_CONFIDENCE = 0.5;
 const MIN_FACE_WIDTH_RATIO = 0.15;
 
 function getFrameWidth(input: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement): number {
@@ -117,10 +121,27 @@ export function describeQualityIssue(issue: FaceQualityIssue): string {
 }
 
 /**
- * Limiar calibrado em `showcases/ponto-inteligente/threshold_calibration.py`
- * (FAR/FRR/Equal Error Rate) — repetido aqui, não recalculado.
+ * Limiar de decisão — CORRIGIDO após observar falsos negativos reais nesta
+ * demo (a mesma pessoa sendo reprovada com similaridade ~0.50).
+ *
+ * O motivo: `threshold_calibration.py` no showcase calibra o método
+ * FAR/FRR/Equal Error Rate sobre uma distribuição SIMULADA (para ensinar a
+ * técnica de forma abstrata) — o valor que ela produz (~0.65 nesta escala)
+ * não é uma medida real da distribuição de distâncias do
+ * `@vladmandic/face-api`. Para descritores reais de 128 dimensões desta
+ * família de modelo (dlib / face-api.js), a referência amplamente adotada
+ * pela comunidade é distância euclidiana <= 0.6 para "mesma pessoa" — que,
+ * nesta escala de similaridade (1 - distância), corresponde a >= 0.4.
+ *
+ * Para comparação de mercado: sistemas bancários/KYC mira taxas de falsa
+ * aceitação (FAR) de 0.001%-0.1%, com modelos proprietários multi-modais
+ * (infravermelho, prova de vida) muito além do que um descritor de 128
+ * números rodando no navegador consegue garantir sozinho — este é um
+ * modelo de classe "controle de acesso/ponto", não de classe bancária, e
+ * documentar essa limitação é mais honesto do que fingir precisão que o
+ * modelo não tem.
  */
-const SIMILARITY_THRESHOLD = 0.65;
+const SIMILARITY_THRESHOLD = 0.4;
 
 export interface FaceMatchResult {
   similarity: number;

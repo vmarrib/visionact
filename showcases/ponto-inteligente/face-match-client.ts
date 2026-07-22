@@ -29,18 +29,24 @@ export interface FaceMatchResult {
 }
 
 /**
- * Limiar de similaridade — calibrado, não escolhido "no olho".
+ * Limiar de similaridade — e uma correção real que vale documentar.
  *
- * Valor obtido rodando `threshold_calibration.py` sobre um conjunto de
- * comparações genuínas/impostoras: o Equal Error Rate (EER) ficou em
- * threshold≈0.68; o limiar abaixo prioriza deliberadamente um FAR baixo
- * (recomendado para FAR <= 2%: threshold≈0.655), aceitando mais FRR em
- * troca — para ponto eletrônico, aprovar um impostor é pior do que um
- * funcionário legítimo precisar tentar de novo. No sistema real, esse
- * valor é configurável por organização, mas parte de uma calibração como
- * essa, não de um número redondo arbitrário.
+ * `threshold_calibration.py` ensina o método FAR/FRR/Equal Error Rate
+ * (EER≈0.68 numa distribuição SIMULADA) — mas esse número não é uma
+ * medição real de descritores de reconhecimento facial. Ao ligar essa
+ * mesma lógica a um modelo real (128 dimensões, família dlib/face-api.js),
+ * o valor simulado causou falsos negativos: pessoas genuínas reprovadas
+ * com similaridade ~0.50. A referência real, amplamente adotada pela
+ * comunidade para esse modelo, é distância euclidiana <= 0.6 — ou seja,
+ * similaridade >= 0.4 nesta escala.
+ *
+ * Contexto de mercado: bancos miram FAR de 0.001%-0.1% com modelos
+ * proprietários multi-modais (infravermelho, prova de vida); um descritor
+ * de 128 números rodando no navegador é classe controle-de-acesso/ponto,
+ * não classe bancária — vale documentar essa limitação, não escondê-la.
+ * No sistema real, esse valor é configurável por organização.
  */
-const SIMILARITY_THRESHOLD = 0.65;
+const SIMILARITY_THRESHOLD = 0.4;
 
 /**
  * Distância euclidiana entre dois descritores faciais, convertida em uma

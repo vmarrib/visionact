@@ -27,20 +27,20 @@ describe("compareDescriptors", () => {
     expect(result.approved).toBe(true);
   });
 
-  it("aprova no limiar calibrado (0.65) — mesmo valor usado no showcase", () => {
-    // distância euclidiana de 0.35 -> similaridade 1 - 0.35 = 0.65.
+  it("aprova no limiar real de mercado para descritores dlib/face-api.js (distância <= 0.6 => similaridade >= 0.4)", () => {
+    // distância euclidiana de 0.6 -> similaridade 1 - 0.6 = 0.4.
     const a = descriptor(0);
-    const b = descriptor(0.35);
+    const b = descriptor(0.6);
 
     const result = compareDescriptors(a, b);
 
-    expect(result.similarity).toBeCloseTo(0.65, 5);
+    expect(result.similarity).toBeCloseTo(0.4, 5);
     expect(result.approved).toBe(true);
   });
 
   it("reprova uma similaridade logo abaixo do limiar", () => {
     const a = descriptor(0);
-    const b = descriptor(0.36);
+    const b = descriptor(0.61);
 
     const result = compareDescriptors(a, b);
 

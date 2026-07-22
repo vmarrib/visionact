@@ -291,7 +291,7 @@ export function FaceMatchDemo() {
               </span>
               <span className="font-mono text-xs text-muted-foreground">
                 similaridade = <span className="font-semibold text-foreground">{result.similarity.toFixed(3)}</span>{" "}
-                (limiar calibrado: 0.650)
+                (limiar: 0.400 — distância euclidiana ≤ 0.6, padrão dlib/face-api.js)
               </span>
             </div>
           )}

@@ -142,8 +142,10 @@ export function PontoInteligente() {
       <Section label="Demo" title="Experimente o pipeline acima, ao vivo">
         <p className="mb-4 text-muted-foreground">
           Envie uma foto de referência e tire outra pela câmera — os mesmos 3 modelos da tabela
-          acima rodam de verdade no seu navegador, com o mesmo limiar calibrado documentado na
-          seção de validação estatística abaixo. Código em{" "}
+          acima rodam de verdade no seu navegador. O limiar de decisão usado aqui{" "}
+          <strong>não é</strong> o número simulado da seção de validação estatística abaixo — é o
+          padrão real de mercado para este modelo (distância euclidiana ≤ 0.6). Explico o porquê
+          logo ali embaixo. Código em{" "}
           <code className="rounded bg-secondary px-1 py-0.5 text-xs">src/lib/face-match-live.ts</code>.
         </p>
         <FaceMatchDemo />
@@ -198,11 +200,25 @@ Raio para aceitar 95% das leituras legítimas: 61.3 m
 Raio para aceitar 99% das leituras legítimas: 74.3 m`}
           />
         </div>
-        <p className="mt-4 text-sm text-muted-foreground">
-          O limiar de similaridade usado no app (0.65) não é o EER — é deliberadamente próximo
-          dele, priorizando FAR baixo mesmo à custa de mais FRR: para ponto eletrônico, aprovar um
-          impostor é pior do que um funcionário legítimo precisar tentar de novo.
-        </p>
+        <div className="mt-4 rounded-md border border-neutral/30 bg-neutral/10 p-4">
+          <p className="mb-2 font-mono text-xs uppercase tracking-widest text-neutral">
+            Correção registrada em produção
+          </p>
+          <p className="text-sm text-foreground">
+            A calibração acima roda sobre uma distribuição <strong>simulada</strong>, criada só
+            para ensinar o método FAR/FRR/EER de forma abstrata — nunca foi uma medição real do{" "}
+            <code className="text-xs">@vladmandic/face-api</code>. A demo ao vivo inicialmente
+            reaproveitou o número que saiu dali (0.65), e isso causou falsos negativos reais: a
+            mesma pessoa sendo reprovada com similaridade ~0.50. O limiar em produção foi
+            corrigido para <strong>0.4</strong> (distância euclidiana ≤ 0.6), a referência real
+            adotada pela comunidade dlib/face-api.js para descritores de 128 dimensões — bem mais
+            permissiva que a calibração simulada. Para contexto de mercado: sistemas bancários
+            miram FAR de 0,001%–0,1% com modelos proprietários multi-modais (infravermelho, prova
+            de vida); um descritor de 128 números rodando no navegador é classe
+            controle-de-acesso/ponto, não classe bancária — e isso é documentado aqui, não
+            escondido.
+          </p>
+        </div>
       </Section>
 
       <Section label="Biometria" title="Checagem de qualidade e segurança em camadas">

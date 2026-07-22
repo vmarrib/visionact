@@ -98,10 +98,19 @@ EER: threshold=0.680 far=0.014 frr=0.012
 Limiar recomendado (FAR <= 2%): threshold=0.655 far=0.020 frr=0.004
 ```
 
-O limiar usado em `face-match-client.ts` (0.65) não é o EER — é
-deliberadamente próximo dele, mas escolhido para manter o FAR baixo mesmo à
-custa de mais FRR: para ponto eletrônico, aprovar um impostor (fraude) é
-pior do que um funcionário legítimo precisar tentar de novo.
+**Correção registrada**: o limiar em `face-match-client.ts` originalmente
+reaproveitava o número acima (0.65) — mas essa distribuição é **simulada**,
+criada só para ensinar o método, e não representa a distância real de
+descritores do `@vladmandic/face-api`. Ao ligar essa lógica a um modelo
+real, 0.65 causou falsos negativos (pessoas genuínas reprovadas com
+similaridade ~0.50, observado na demo ao vivo do portfólio). O limiar
+correto para descritores de 128 dimensões dessa família de modelo (dlib/
+face-api.js) é a referência real de mercado: distância euclidiana <= 0.6,
+ou seja, **similaridade >= 0.4** nesta escala — bem mais permissiva que a
+calibração simulada. Para contexto: sistemas bancários miram FAR de
+0.001%-0.1% com modelos multi-modais (infravermelho, prova de vida); um
+descritor de 128 números no navegador é classe controle-de-acesso/ponto,
+não classe bancária.
 
 **Geolocalização — calibração do raio por percentil empírico**
 `geofence_calibration.py` aplica a mesma lógica usada para definir SLOs de
