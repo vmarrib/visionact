@@ -30,7 +30,7 @@ export function PontoInteligente() {
         name={meta.name}
         tagline={meta.tagline}
         domain={meta.domain}
-        problem="Equipes que trabalham em múltiplos locais e turnos precisam de uma prova confiável de presença — mas digitais se desgastam com trabalho manual, crachás podem ser emprestados, e papel não resiste a uma disputa trabalhista. Gerir jornada de verdade exige confirmar, na mesma batida, que a pessoa está fisicamente no local autorizado e que é de fato ela quem está ali, com uma trilha auditável de cada tentativa — aprovada ou não."
+        problem="Construído para uma indústria de alimentos com vendedores e trabalhadores externos, atuando em múltiplos locais e turnos. Prova de presença por digital falha com trabalho manual, crachá pode ser emprestado, e papel não resiste a uma disputa trabalhista. O sistema confirma, na mesma batida, que a pessoa está fisicamente no local certo e que é ela mesma — com cada tentativa, aprovada ou não, registrada e armazenada de forma segura."
         stack={meta.stack}
         github={meta.github}
       />
@@ -151,7 +151,7 @@ export function PontoInteligente() {
         <FaceMatchDemo />
       </Section>
 
-      <Section label="Validação estatística" title="Calibrando limiares como cientista de dados, não no olho">
+      <Section label="Validação estatística" title="Como os limiares de decisão foram calibrados">
         <p className="mb-4 text-muted-foreground">
           A parte mais fácil de fazer errado num sistema biométrico é escolher um número redondo
           para o limiar de decisão sem justificar por quê. Os dois limiares centrais deste projeto
