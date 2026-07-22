@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 import { createFileRoute, notFound, useRouter, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
-import { projects } from "@/lib/projects";
+import { profile, projects } from "@/lib/projects";
 import { PitaIA } from "@/components/projects/PitaIA";
 import { ChecagemDeRisco } from "@/components/projects/ChecagemDeRisco";
 import { PontoInteligente } from "@/components/projects/PontoInteligente";
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/projects/$slug")({
   head: ({ loaderData }) => {
     const p = loaderData?.project;
     if (!p) return {};
-    const title = `${p.name}, Vanessa M. Ribeiro`;
+    const title = `${p.name} — ${profile.siteName}`;
     return {
       meta: [
         { title },

@@ -6,8 +6,10 @@ export function SiteFooter() {
     <footer className="border-t border-border">
       <div className="mx-auto flex max-w-5xl flex-col gap-4 px-5 py-10 sm:flex-row sm:items-center sm:justify-between">
         <div className="font-mono text-xs text-muted-foreground">
-          <p className="text-foreground">{profile.name}</p>
-          <p className="mt-1">{profile.role}</p>
+          <p className="text-foreground">{profile.siteName}</p>
+          <p className="mt-1">
+            {profile.byline} · {profile.role}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-4 font-mono text-xs">
           <a href={`mailto:${profile.email}`} className="text-muted-foreground transition-colors hover:text-foreground">

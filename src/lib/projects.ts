@@ -50,6 +50,8 @@ export const projects: ProjectMeta[] = [
 ];
 
 export const profile = {
+  siteName: "Vision Act",
+  byline: "por Vanessa Ribeiro",
   name: "Vanessa M. Ribeiro",
   role: "Engenheira & Cientista de Dados",
   summary:

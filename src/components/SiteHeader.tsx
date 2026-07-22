@@ -7,10 +7,10 @@ export function SiteHeader() {
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5">
         <Link to="/" className="group flex items-center gap-2">
           <span className="flex h-6 w-6 items-center justify-center rounded-md bg-foreground font-mono text-xs font-semibold text-background">
-            vr
+            va
           </span>
           <span className="font-mono text-sm font-medium tracking-tight text-foreground">
-            {profile.name}
+            {profile.siteName}
           </span>
         </Link>
         <nav className="flex items-center gap-1 font-mono text-xs">

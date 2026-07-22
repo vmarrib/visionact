@@ -5,13 +5,13 @@ import { projects, profile } from "@/lib/projects";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vanessa M. Ribeiro, Engenheira & Cientista de Dados" },
+      { title: "Vision Act, por Vanessa Ribeiro" },
       {
         name: "description",
         content:
-          "Portfólio de Vanessa M. Ribeiro: engenharia de dados aplicada a domínios sensíveis do mundo real — saúde, compliance e biometria. Três projetos em produção, de ponta a ponta.",
+          "Vision Act — portfólio de Vanessa Ribeiro: engenharia de dados aplicada a domínios sensíveis do mundo real — saúde, compliance e biometria. Três projetos em produção, de ponta a ponta.",
       },
-      { property: "og:title", content: "Vanessa M. Ribeiro, Engenheira & Cientista de Dados" },
+      { property: "og:title", content: "Vision Act, por Vanessa Ribeiro" },
       {
         property: "og:description",
         content:
@@ -38,11 +38,12 @@ function Index() {
       {/* Hero */}
       <section className="mx-auto max-w-5xl px-5 pt-16 pb-10 sm:pt-24">
         <p className="font-mono text-xs uppercase tracking-widest text-primary">
-          Engenheira & Cientista de Dados
+          {profile.role}
         </p>
         <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl">
-          {profile.name}
+          {profile.siteName}
         </h1>
+        <p className="mt-2 font-mono text-sm text-muted-foreground">{profile.byline}</p>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
           {profile.summary}
         </p>
