@@ -4,6 +4,7 @@ import { FlowDiagram } from "@/components/FlowDiagram";
 import { TechStack } from "@/components/TechStack";
 import { CodeBlock } from "@/components/CodeBlock";
 import { FeatureCards, BulletList } from "@/components/FeatureCards";
+import { FaceMatchDemo } from "./FaceMatchDemo";
 import { projects } from "@/lib/projects";
 
 const meta = projects.find((p) => p.slug === "ponto-inteligente")!;
@@ -136,6 +137,16 @@ export function PontoInteligente() {
             </tbody>
           </table>
         </div>
+      </Section>
+
+      <Section label="Demo" title="Experimente o pipeline acima, ao vivo">
+        <p className="mb-4 text-muted-foreground">
+          Envie uma foto de referência e tire outra pela câmera — os mesmos 3 modelos da tabela
+          acima rodam de verdade no seu navegador, com o mesmo limiar calibrado documentado na
+          seção de validação estatística abaixo. Código em{" "}
+          <code className="rounded bg-secondary px-1 py-0.5 text-xs">src/lib/face-match-live.ts</code>.
+        </p>
+        <FaceMatchDemo />
       </Section>
 
       <Section label="Validação estatística" title="Calibrando limiares como cientista de dados, não no olho">

@@ -1,5 +1,7 @@
 # visionact
 
+[![Tests](https://github.com/vmarrib/visionact/actions/workflows/tests.yml/badge.svg)](https://github.com/vmarrib/visionact/actions/workflows/tests.yml)
+
 Código-fonte do portfólio de **Vanessa M. Ribeiro** — Engenheira & Cientista
 de Dados.
 

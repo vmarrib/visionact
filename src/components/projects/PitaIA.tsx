@@ -21,6 +21,28 @@ export function PitaIA() {
         liveUrl="https://apitaia.com"
       />
 
+      <Section label="Demo" title="O app está no ar — sem simulação nesta página">
+        <div className="flex flex-col items-start justify-between gap-4 rounded-lg border border-primary/30 bg-accent p-5 sm:flex-row sm:items-center">
+          <div>
+            <p className="font-semibold text-accent-foreground">
+              Diferente do Checagem de Risco (que tem uma demo embutida), o PitaIA é um produto
+              completo em produção — a forma mais honesta de mostrar é te mandar direto pra lá.
+            </p>
+            <p className="mt-1 text-sm text-accent-foreground/80">
+              Cadastro gratuito, sem cartão de crédito.
+            </p>
+          </div>
+          <a
+            href="https://apitaia.com"
+            target="_blank"
+            rel="noreferrer"
+            className="shrink-0 rounded-md bg-foreground px-5 py-2.5 font-mono text-sm font-semibold text-background transition-opacity hover:opacity-90"
+          >
+            Criar conta grátis →
+          </a>
+        </div>
+      </Section>
+
       <Section label="Modelagem de acesso" title="RLS multi-papel, não só autenticação">
         <p className="text-muted-foreground">
           Toda a base é multiusuário com Row Level Security no Postgres: funções{" "}

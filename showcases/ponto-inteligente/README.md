@@ -7,6 +7,16 @@
 > qualquer dado biométrico foram omitidos — o objetivo é mostrar a
 > arquitetura e a metodologia de calibração, não o schema de produção.
 
+> **Demo ao vivo**: a página deste projeto no site do portfólio tem uma
+> demonstração real de reconhecimento facial — envie uma foto de
+> referência, tire outra pela câmera, e o mesmo pipeline de 3 estágios
+> (`@vladmandic/face-api`) e o mesmo limiar calibrado abaixo rodam de
+> verdade, 100% no navegador de quem está vendo. Código em
+> `src/lib/face-match-live.ts` e
+> `src/components/projects/FaceMatchDemo.tsx` na raiz do repositório
+> `visionact` (fora desta pasta `showcases/`, porque é parte do próprio
+> site).
+
 ## Contexto do projeto
 
 Construído sob encomenda, com exclusividade, para uma indústria de
