@@ -112,6 +112,20 @@ calibração simulada. Para contexto: sistemas bancários miram FAR de
 descritor de 128 números no navegador é classe controle-de-acesso/ponto,
 não classe bancária.
 
+**Vulnerabilidade encontrada e corrigida: prova de vivacidade**
+Testando a demo ao vivo, uma FOTO estática aproximada da câmera foi
+aprovada como "mesma pessoa" — o FaceMatch confirma QUEM está na imagem,
+mas nunca verificava SE a captura vinha de uma pessoa real, ao vivo. Essa
+classe de vulnerabilidade se chama **ataque de apresentação**
+(presentation attack), bem documentada na literatura de biometria facial.
+
+Contramedida implementada em `liveness-challenge.ts`: desafio de movimento
+aleatório. Antes de aceitar uma captura, o sistema pede uma ação (sorrir,
+abrir a boca, ou virar o rosto — escolhida ao acaso), compara um quadro
+"antes" (neutro) com um quadro "depois" do desafio, e só aceita se a
+mudança observada é consistente com o que foi pedido. Uma foto ou um
+vídeo em loop não reage sob comando aleatório.
+
 **Geolocalização — calibração do raio por percentil empírico**
 `geofence_calibration.py` aplica a mesma lógica usada para definir SLOs de
 latência em engenharia de confiabilidade, só que para erro de
@@ -127,7 +141,7 @@ Raio para aceitar 95% das leituras legítimas: 61.3 m
 Raio para aceitar 99% das leituras legítimas: 74.3 m
 ```
 
-Os 48 testes deste showcase (18 em Python + 30 em Vitest, ver seção de
+Os 59 testes deste showcase (18 em Python + 41 em Vitest, ver seção de
 arquivos) — os de Python foram rodados de verdade, com `pytest`.
 
 ## Decisões técnicas e alternativas consideradas
@@ -179,6 +193,21 @@ auditoria era literalmente o requisito de negócio mais importante do
 projeto, não um detalhe técnico. Toda tentativa — aprovada ou não — é
 registrada com o grau de similaridade e o motivo da decisão.
 
+**7. Prova de vivacidade por desafio de movimento, não por classificador de spoofing**
+A alternativa mais comum na indústria para detectar ataques de
+apresentação é um modelo de classificação treinado especificamente para
+distinguir textura de pele real de foto/tela impressa — mas isso exige um
+dataset rotulado de ataques reais, que não temos, e adicionaria mais um
+modelo (com seu próprio custo de acurácia e falsos positivos) à pilha.
+Desafio de movimento aleatório usa os mesmos landmarks e o mesmo
+classificador de expressão que já estavam disponíveis, é auditável em
+código simples (comparar duas posições de pontos), e ataca diretamente o
+vetor de fraude mais barato — uma foto — sem depender de dados de
+treinamento que não existem para este projeto. Não é infalível (ver
+`liveness-challenge.ts` para a discussão do trade-off), mas é
+proporcional ao risco real de um sistema de ponto, não de um cofre de
+banco.
+
 ## Stack
 
 TypeScript, reconhecimento facial client-side (baseado em modelos que rodam
@@ -200,6 +229,9 @@ pytest para os testes.
   vivo.
 - [`rls-audit.sql`](./rls-audit.sql) — RLS multi-papel e tabela de auditoria
   de tentativas de verificação.
+- [`liveness-challenge.ts`](./liveness-challenge.ts) — prova de vivacidade
+  por desafio de movimento aleatório (sorrir, abrir a boca, virar o
+  rosto), contramedida a ataques de apresentação (foto/vídeo estático).
 - [`threshold_calibration.py`](./threshold_calibration.py) — calibração do
   limiar de FaceMatch via FAR/FRR/Equal Error Rate.
 - [`geofence_calibration.py`](./geofence_calibration.py) — calibração do
@@ -207,9 +239,11 @@ pytest para os testes.
 - [`geofence.test.ts`](./geofence.test.ts),
   [`geolocation.test.ts`](./geolocation.test.ts),
   [`face-match-client.test.ts`](./face-match-client.test.ts),
-  [`face-match-pipeline.test.ts`](./face-match-pipeline.test.ts) — 30
+  [`face-match-pipeline.test.ts`](./face-match-pipeline.test.ts),
+  [`liveness-challenge.test.ts`](./liveness-challenge.test.ts) — 41
   testes Vitest cobrindo distância geográfica, confiabilidade de leitura de
-  GPS, comparação de descritores e checagem de qualidade facial.
+  GPS, comparação de descritores, checagem de qualidade facial e avaliação
+  do desafio de vivacidade.
 - [`test_threshold_calibration.py`](./test_threshold_calibration.py),
   [`test_geofence_calibration.py`](./test_geofence_calibration.py) — 18
   testes pytest cobrindo a calibração estatística, **rodados e verificados

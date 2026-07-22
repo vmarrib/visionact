@@ -142,11 +142,16 @@ export function PontoInteligente() {
       <Section label="Demo" title="Experimente o pipeline acima, ao vivo">
         <p className="mb-4 text-muted-foreground">
           Envie uma foto de referência e tire outra pela câmera — os mesmos 3 modelos da tabela
-          acima rodam de verdade no seu navegador. O limiar de decisão usado aqui{" "}
+          acima rodam de verdade no seu navegador. Antes de aceitar a captura, o sistema pede uma
+          ação aleatória (sorrir, abrir a boca, virar o rosto) e só segue adiante se a mudança
+          entre o quadro neutro e o quadro do desafio bater com o que foi pedido — uma foto
+          estática não reage sob comando. O limiar de decisão usado aqui{" "}
           <strong>não é</strong> o número simulado da seção de validação estatística abaixo — é o
           padrão real de mercado para este modelo (distância euclidiana ≤ 0.6). Explico o porquê
           logo ali embaixo. Código em{" "}
-          <code className="rounded bg-secondary px-1 py-0.5 text-xs">src/lib/face-match-live.ts</code>.
+          <code className="rounded bg-secondary px-1 py-0.5 text-xs">src/lib/face-match-live.ts</code>{" "}
+          e{" "}
+          <code className="rounded bg-secondary px-1 py-0.5 text-xs">src/lib/liveness-challenge.ts</code>.
         </p>
         <FaceMatchDemo />
       </Section>
@@ -219,6 +224,22 @@ Raio para aceitar 99% das leituras legítimas: 74.3 m`}
             escondido.
           </p>
         </div>
+        <div className="mt-4 rounded-md border border-neutral/30 bg-neutral/10 p-4">
+          <p className="mb-2 font-mono text-xs uppercase tracking-widest text-neutral">
+            Segunda correção: ataque de apresentação
+          </p>
+          <p className="text-sm text-foreground">
+            Um segundo teste real expôs outra lacuna: segurar uma <strong>foto estática</strong> em
+            frente à câmera também era aprovada como "mesma pessoa" — o FaceMatch confirma quem
+            está na imagem, mas nunca verificava se a captura vinha de uma pessoa viva. É uma
+            vulnerabilidade conhecida em biometria facial (ataque de apresentação). A contramedida
+            foi um desafio de movimento aleatório: sorrir, abrir a boca ou virar o rosto, escolhido
+            na hora, comparando um quadro neutro com um quadro depois do desafio — uma foto ou um
+            vídeo em loop não reage sob comando aleatório. Não é infalível (um vídeo preparado com
+            todas as reações poderia, em teoria, ser sincronizado), mas eleva o custo do ataque bem
+            além de "segurar uma foto", que é o vetor mais barato e mais comum.
+          </p>
+        </div>
       </Section>
 
       <Section label="Biometria" title="Checagem de qualidade e segurança em camadas">
@@ -238,6 +259,16 @@ Raio para aceitar 99% das leituras legítimas: 74.3 m`}
                     ]}
                   />
                 </>
+              ),
+            },
+            {
+              title: "Prova de vivacidade",
+              body: (
+                <p>
+                  Antes de aceitar a captura, um desafio de movimento aleatório (sorrir, abrir a
+                  boca, virar o rosto) confirma que é uma pessoa real ao vivo — contramedida a foto
+                  ou vídeo estático, adicionada depois de um teste real expor essa brecha.
+                </p>
               ),
             },
             {

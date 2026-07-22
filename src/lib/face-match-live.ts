@@ -7,9 +7,11 @@
  * FaceRecognitionNet), mesmos limiares calibrados lá
  * (`face-match-pipeline.ts`, `threshold_calibration.py`) — esta versão só
  * troca o showcase estático por uma chamada real à biblioteca
- * `@vladmandic/face-api`, a mesma usada no projeto real.
+ * `@vladmandic/face-api`, a mesma usada no projeto real. Um quarto modelo
+ * (FaceExpressionNet, ~310 KB) foi adicionado para a prova de vivacidade —
+ * ver `analyzeLiveFrame` e `showcases/ponto-inteligente/liveness-challenge.ts`.
  *
- * Os pesos dos modelos (~6,7 MB no total) são carregados de um CDN público
+ * Os pesos dos modelos (~7 MB no total) são carregados de um CDN público
  * (jsdelivr, servindo o próprio pacote npm) na primeira vez que a demo é
  * aberta — não ficam embutidos no bundle do site para não pesar no
  * carregamento de quem só quer ler as outras páginas do portfólio.
@@ -18,6 +20,10 @@
  * que só existem no navegador — importar no topo do arquivo quebraria a
  * renderização no servidor (SSR) do TanStack Start.
  */
+
+import type { LivenessFrameMetrics } from "./liveness-challenge";
+
+export { describeChallenge, evaluateChallenge, pickRandomChallenge, type LivenessChallenge } from "./liveness-challenge";
 
 const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model";
 
@@ -35,6 +41,7 @@ export function loadFaceMatchModels(): Promise<void> {
       faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
       faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
       faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+      faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
     ]);
 
     faceapiModule = faceapi;
@@ -105,6 +112,82 @@ export async function detectFace(
   }
 
   return { descriptor: face.descriptor, qualityIssue: null };
+}
+
+export interface LiveFrameAnalysis {
+  descriptor: Float32Array;
+  metrics: LivenessFrameMetrics;
+}
+
+export interface LiveFrameAnalysisOutcome {
+  analysis: LiveFrameAnalysis;
+  qualityIssue: null;
+}
+
+export interface LiveFrameAnalysisFailure {
+  analysis: null;
+  qualityIssue: FaceQualityIssue;
+}
+
+// Índices no esquema padrão de 68 pontos (iBUG 300-W) — ver
+// showcases/ponto-inteligente/liveness-challenge.ts para o porquê de cada um.
+const LANDMARK_NOSE_TIP = 30;
+const LANDMARK_RIGHT_EYE_OUTER = 36;
+const LANDMARK_LEFT_EYE_OUTER = 45;
+const LANDMARK_MOUTH_TOP_INNER = 62;
+const LANDMARK_MOUTH_BOTTOM_INNER = 66;
+
+/**
+ * Mesma detecção de `detectFace`, mas também extrai expressão e os pontos
+ * de referência usados pelo desafio de vivacidade — usada nos quadros da
+ * câmera ao vivo (nunca na foto de referência, que não precisa "sorrir
+ * sob comando").
+ */
+export async function analyzeLiveFrame(
+  input: HTMLCanvasElement | HTMLVideoElement,
+): Promise<LiveFrameAnalysisOutcome | LiveFrameAnalysisFailure> {
+  if (!faceapiModule) {
+    throw new Error("loadFaceMatchModels() precisa ser chamado (e aguardado) antes de analyzeLiveFrame().");
+  }
+
+  const detections = await faceapiModule
+    .detectAllFaces(input, new faceapiModule.TinyFaceDetectorOptions())
+    .withFaceLandmarks()
+    .withFaceExpressions()
+    .withFaceDescriptors();
+
+  if (detections.length === 0) {
+    return { analysis: null, qualityIssue: "no_face_detected" };
+  }
+  if (detections.length > 1) {
+    return { analysis: null, qualityIssue: "multiple_faces_detected" };
+  }
+
+  const [face] = detections;
+
+  if (face.detection.score < MIN_DETECTION_CONFIDENCE) {
+    return { analysis: null, qualityIssue: "low_confidence" };
+  }
+  if (face.detection.box.width / getFrameWidth(input) < MIN_FACE_WIDTH_RATIO) {
+    return { analysis: null, qualityIssue: "face_too_small" };
+  }
+
+  const points = face.landmarks.positions;
+
+  return {
+    analysis: {
+      descriptor: face.descriptor,
+      metrics: {
+        noseTip: points[LANDMARK_NOSE_TIP],
+        rightEyeOuter: points[LANDMARK_RIGHT_EYE_OUTER],
+        leftEyeOuter: points[LANDMARK_LEFT_EYE_OUTER],
+        mouthTop: points[LANDMARK_MOUTH_TOP_INNER],
+        mouthBottom: points[LANDMARK_MOUTH_BOTTOM_INNER],
+        happy: face.expressions.happy,
+      },
+    },
+    qualityIssue: null,
+  };
 }
 
 export function describeQualityIssue(issue: FaceQualityIssue): string {

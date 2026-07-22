@@ -1,18 +1,35 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import {
+  analyzeLiveFrame,
   compareDescriptors,
+  describeChallenge,
   describeQualityIssue,
   detectFace,
+  evaluateChallenge,
   loadFaceMatchModels,
+  pickRandomChallenge,
   type FaceMatchResult,
   type FaceQualityIssue,
+  type LiveFrameAnalysis,
+  type LivenessChallenge,
 } from "@/lib/face-match-live";
 
 type Phase = "idle" | "loading_models" | "ready";
+type LivenessStatus = "idle" | "hold_still" | "waiting_challenge" | "checking" | "failed";
 
 interface SideIssue {
   side: "reference" | "capture";
   issue: FaceQualityIssue;
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function captureFrame(video: HTMLVideoElement, canvas: HTMLCanvasElement) {
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext("2d")?.drawImage(video, 0, 0, canvas.width, canvas.height);
 }
 
 export function FaceMatchDemo() {
@@ -26,9 +43,14 @@ export function FaceMatchDemo() {
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [captured, setCaptured] = useState(false);
+  const [capturedAnalysis, setCapturedAnalysis] = useState<LiveFrameAnalysis | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  const [livenessStatus, setLivenessStatus] = useState<LivenessStatus>("idle");
+  const [currentChallenge, setCurrentChallenge] = useState<LivenessChallenge | null>(null);
+  const [livenessMessage, setLivenessMessage] = useState<string | null>(null);
 
   const [comparing, setComparing] = useState(false);
   const [sideIssue, setSideIssue] = useState<SideIssue | null>(null);
@@ -84,30 +106,82 @@ export function FaceMatchDemo() {
     streamRef.current = null;
     setCameraActive(false);
     setCaptured(false);
+    setLivenessStatus("idle");
   }
 
-  function handleCapture() {
+  /**
+   * Prova de vivacidade por desafio de movimento — motivada por um teste
+   * real desta demo em que uma FOTO estática, aproximada da câmera, foi
+   * aprovada como "mesma pessoa". Detecta um quadro-base (neutro), pede uma
+   * ação aleatória (sorrir, abrir a boca, virar o rosto), captura um
+   * segundo quadro e só aceita a captura se a mudança observada bater com
+   * o que foi pedido — uma foto ou um vídeo em loop não reage sob comando.
+   */
+  async function handleVerifyAndCapture() {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d")?.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    setCaptured(true);
     setResult(null);
     setSideIssue(null);
+    setCompareError(null);
+    setLivenessMessage(null);
+    setLivenessStatus("hold_still");
+
+    const baselineCanvas = document.createElement("canvas");
+    captureFrame(video, baselineCanvas);
+    const baselineOutcome = await analyzeLiveFrame(baselineCanvas);
+
+    if (baselineOutcome.qualityIssue) {
+      setLivenessMessage(describeQualityIssue(baselineOutcome.qualityIssue));
+      setLivenessStatus("failed");
+      return;
+    }
+
+    const challenge = pickRandomChallenge();
+    setCurrentChallenge(challenge);
+    setLivenessStatus("waiting_challenge");
+
+    await wait(2500);
+
+    captureFrame(video, canvas);
+    setLivenessStatus("checking");
+    const attemptOutcome = await analyzeLiveFrame(canvas);
+
+    if (attemptOutcome.qualityIssue) {
+      setLivenessMessage(describeQualityIssue(attemptOutcome.qualityIssue));
+      setLivenessStatus("failed");
+      setCurrentChallenge(null);
+      return;
+    }
+
+    const passed = evaluateChallenge(challenge, baselineOutcome.analysis.metrics, attemptOutcome.analysis.metrics);
+
+    if (!passed) {
+      setLivenessMessage("Não conseguimos confirmar que é uma pessoa ao vivo. Tente de novo.");
+      setLivenessStatus("failed");
+      setCurrentChallenge(null);
+      return;
+    }
+
+    setCapturedAnalysis(attemptOutcome.analysis);
+    setCaptured(true);
+    setLivenessStatus("idle");
+    setCurrentChallenge(null);
   }
 
   function handleRetake() {
     setCaptured(false);
+    setCapturedAnalysis(null);
     setResult(null);
     setSideIssue(null);
+    setLivenessStatus("idle");
+    setLivenessMessage(null);
+    setCurrentChallenge(null);
   }
 
   async function handleCompare() {
-    if (!referenceImgRef.current || !canvasRef.current) return;
+    if (!referenceImgRef.current || !capturedAnalysis) return;
 
     setComparing(true);
     setResult(null);
@@ -115,21 +189,14 @@ export function FaceMatchDemo() {
     setCompareError(null);
 
     try {
-      const [referenceOutcome, captureOutcome] = await Promise.all([
-        detectFace(referenceImgRef.current),
-        detectFace(canvasRef.current),
-      ]);
+      const referenceOutcome = await detectFace(referenceImgRef.current);
 
       if (referenceOutcome.qualityIssue) {
         setSideIssue({ side: "reference", issue: referenceOutcome.qualityIssue });
         return;
       }
-      if (captureOutcome.qualityIssue) {
-        setSideIssue({ side: "capture", issue: captureOutcome.qualityIssue });
-        return;
-      }
 
-      setResult(compareDescriptors(referenceOutcome.descriptor, captureOutcome.descriptor));
+      setResult(compareDescriptors(referenceOutcome.descriptor, capturedAnalysis.descriptor));
     } catch {
       setCompareError("Não foi possível analisar as imagens. Tente tirar a foto de novo.");
     } finally {
@@ -137,6 +204,7 @@ export function FaceMatchDemo() {
     }
   }
 
+  const verifyingLiveness = livenessStatus !== "idle" && livenessStatus !== "failed";
   const canCompare = referenceReady && captured && !comparing;
 
   return (
@@ -151,7 +219,9 @@ export function FaceMatchDemo() {
           <p className="text-sm text-muted-foreground">
             Envie uma foto de referência e tire outra pela câmera — o mesmo pipeline de 3 estágios
             (detecção → landmarks → descritor) documentado no showcase roda aqui de verdade, 100%
-            no seu navegador. Nenhuma imagem é enviada a um servidor. Isso baixa ~6,7 MB de modelos
+            no seu navegador. A captura ao vivo passa por um desafio de vivacidade (sorrir, abrir a
+            boca ou virar o rosto, escolhido ao acaso) antes de ser aceita — uma foto estática não
+            reage sob comando. Nenhuma imagem é enviada a um servidor. Isso baixa ~7 MB de modelos
             na primeira vez.
           </p>
           <button
@@ -165,7 +235,7 @@ export function FaceMatchDemo() {
       )}
 
       {phase === "loading_models" && (
-        <p className="text-sm text-muted-foreground">Carregando modelos (~6,7 MB)…</p>
+        <p className="text-sm text-muted-foreground">Carregando modelos (~7 MB)…</p>
       )}
 
       {phase === "ready" && (
@@ -204,7 +274,7 @@ export function FaceMatchDemo() {
               <p className="mb-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
                 Captura ao vivo
               </p>
-              <div className="mb-2 aspect-square overflow-hidden rounded-md border border-dashed border-border bg-surface">
+              <div className="relative mb-2 aspect-square overflow-hidden rounded-md border border-dashed border-border bg-surface">
                 <video
                   ref={videoRef}
                   autoPlay
@@ -221,6 +291,17 @@ export function FaceMatchDemo() {
                     Câmera desativada
                   </div>
                 )}
+                {verifyingLiveness && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 p-4 text-center">
+                    <p className="font-mono text-sm font-semibold text-foreground">
+                      {livenessStatus === "hold_still" && "Fique parado(a) um instante…"}
+                      {livenessStatus === "waiting_challenge" &&
+                        currentChallenge &&
+                        `Agora: ${describeChallenge(currentChallenge)}`}
+                      {livenessStatus === "checking" && "Verificando…"}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {!cameraActive && (
@@ -233,10 +314,11 @@ export function FaceMatchDemo() {
               )}
               {cameraActive && !captured && (
                 <button
-                  onClick={handleCapture}
-                  className="w-full rounded-md bg-foreground px-3 py-1.5 font-mono text-xs text-background transition-opacity hover:opacity-90"
+                  onClick={handleVerifyAndCapture}
+                  disabled={verifyingLiveness}
+                  className="w-full rounded-md bg-foreground px-3 py-1.5 font-mono text-xs text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Tirar foto
+                  {verifyingLiveness ? "Verificando vivacidade…" : "Verificar e tirar foto"}
                 </button>
               )}
               {cameraActive && captured && (
@@ -256,6 +338,12 @@ export function FaceMatchDemo() {
                 </div>
               )}
               {cameraError && <p className="mt-2 text-xs text-negative">{cameraError}</p>}
+              {livenessStatus === "failed" && livenessMessage && (
+                <p className="mt-2 text-xs text-negative">{livenessMessage}</p>
+              )}
+              {captured && (
+                <p className="mt-2 text-xs text-positive">✓ Vivacidade confirmada</p>
+              )}
             </div>
           </div>
 
@@ -271,8 +359,7 @@ export function FaceMatchDemo() {
 
           {sideIssue && (
             <p className="text-sm text-negative">
-              {sideIssue.side === "reference" ? "Na foto de referência: " : "Na captura ao vivo: "}
-              {describeQualityIssue(sideIssue.issue)}
+              Na foto de referência: {describeQualityIssue(sideIssue.issue)}
             </p>
           )}
 
