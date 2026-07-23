@@ -15,6 +15,12 @@
  * (`risk-check-cache.ts`), não gera uma nova chamada à BrasilAPI — mitiga
  * o limite de requisições compartilhado da API pública (ver comentário no
  * arquivo do cache sobre o trade-off de rodar em memória do processo).
+ *
+ * Mesmo com o cache, um 429 real em produção mostrou que o limite pode ser
+ * atingido pela infraestrutura compartilhada do host (IPs de saída
+ * compartilhados entre apps num serverless/edge), não só por esta demo —
+ * `fetchWithRetry` (`risk-check-http.ts`) tenta de novo automaticamente
+ * antes de desistir e mostrar o erro ao visitante.
  */
 
 import { createServerFn } from "@tanstack/react-start";
@@ -22,6 +28,7 @@ import { z } from "zod";
 
 import { TtlCache } from "./risk-check-cache";
 import { isValidCnpj, onlyDigits } from "./risk-check-cnpj";
+import { fetchWithRetry } from "./risk-check-http";
 import {
   BrasilApiCnpjSchema,
   buildCnaes,
@@ -76,7 +83,7 @@ export const checkCnpjRisk = createServerFn({ method: "POST" })
 
     let response: Response;
     try {
-      response = await fetch(`${BRASIL_API_CNPJ_ENDPOINT}/${digits}`, {
+      response = await fetchWithRetry(`${BRASIL_API_CNPJ_ENDPOINT}/${digits}`, {
         headers: { Accept: "application/json" },
       });
     } catch {
@@ -85,7 +92,9 @@ export const checkCnpjRisk = createServerFn({ method: "POST" })
 
     if (response.status === 429) {
       // Limite de requisições da BrasilAPI (API pública gratuita, sem
-      // chave) — não é um bug da demo, é o provedor pedindo para esperar.
+      // chave) — já tentamos de novo automaticamente (fetchWithRetry) e
+      // ainda assim recebemos 429. Não é um bug da demo, é o provedor
+      // pedindo para esperar mais do que o retry automático cobre.
       return { status: "rate_limited" };
     }
 

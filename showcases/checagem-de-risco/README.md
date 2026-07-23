@@ -16,6 +16,14 @@
 > `src/components/projects/RiskCheckDemo.tsx` na raiz do repositório
 > `visionact` (fora desta pasta `showcases/`, porque é parte do próprio site,
 > não uma amostra estática).
+>
+> **Correção registrada**: em produção, a demo recebeu HTTP 429 da BrasilAPI
+> mesmo com cache de 5 minutos ativo — plataformas serverless costumam
+> compartilhar IPs de saída entre vários apps, então o limite pode estar
+> sendo atingido pela infraestrutura, não só por esta demo. Adicionado
+> `risk-check-http.ts`: retry automático com backoff exponencial,
+> respeitando o cabeçalho `Retry-After` quando presente, antes de mostrar o
+> erro ao visitante.
 
 ## Problema
 

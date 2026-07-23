@@ -94,9 +94,10 @@ function Dossie({ result }: { result: RiskCheckResult }) {
   if (result.status === "rate_limited") {
     return (
       <p className="mt-4 text-sm text-neutral">
-        A BrasilAPI está limitando requisições no momento (HTTP 429) — é uma API pública gratuita,
-        sem chave, com limite de uso compartilhado entre todos os visitantes. Aguarde alguns
-        segundos e tente de novo.
+        A BrasilAPI está limitando requisições no momento (HTTP 429) — já tentamos de novo
+        automaticamente algumas vezes antes de mostrar este aviso. É uma API pública gratuita, sem
+        chave, com limite compartilhado entre todos os apps hospedados na mesma infraestrutura, não
+        só entre visitantes desta demo. Aguarde um pouco mais e tente de novo.
       </p>
     );
   }
