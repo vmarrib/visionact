@@ -232,16 +232,23 @@ def build_media_signals(
 # A partir daqui, tudo depende de PySpark — mesma separação usada em
 # sources.py, e pelo mesmo motivo: tudo acima é testável com pytest comum,
 # sem precisar de PySpark instalado.
+#
+# Correção registrada: a primeira versão usava `df.rdd.mapPartitions(...)`,
+# que falha em compute serverless (Databricks bloqueia a API de RDD nesse
+# modo — ver o mesmo aviso, mais detalhado, em sources.py). Trocado por
+# `mapInPandas`, DataFrame-native e compatível com serverless.
 # ---------------------------------------------------------------------------
 
 
-def _process_partition(rules: tuple[MediaKeywordRule, ...]):
+def _process_partition_pandas(rules: tuple[MediaKeywordRule, ...]):
     """
     Mesma estratégia de `sources.py`: um cliente de busca por partição, não
-    por linha, para reaproveitar conexões ao consultar o provedor de busca.
+    por linha, para reaproveitar conexões ao consultar o provedor de busca —
+    agora expressa via `mapInPandas` em vez de `mapPartitions` de RDD.
     """
 
-    def process(rows):
+    def process(batches):
+        import pandas as pd
         import requests
 
         class RequestsSearchClient:
@@ -256,8 +263,13 @@ def _process_partition(rules: tuple[MediaKeywordRule, ...]):
         session = requests.Session()
         client = RequestsSearchClient(session)
         try:
-            for row in rows:
-                yield from build_media_signals(row.document_id, row.counterparty_name, client, rules)
+            for batch_df in batches:
+                rows = []
+                for document_id, counterparty_name in zip(
+                    batch_df["document_id"], batch_df["counterparty_name"]
+                ):
+                    rows.extend(build_media_signals(document_id, counterparty_name, client, rules))
+                yield pd.DataFrame(rows)
         finally:
             session.close()
 
@@ -268,5 +280,6 @@ def fetch_media_signals(spark, batch, rules: tuple[MediaKeywordRule, ...] = EXAM
     """Ponto de entrada usado por `pyspark_pipeline.py` — mesmo formato de saída que `sources.py`."""
     from signal_schema import SIGNAL_SCHEMA
 
-    partial = batch.select("document_id", "counterparty_name").rdd.mapPartitions(_process_partition(rules))
-    return spark.createDataFrame(partial, schema=SIGNAL_SCHEMA)
+    return batch.select("document_id", "counterparty_name").mapInPandas(
+        _process_partition_pandas(rules), schema=SIGNAL_SCHEMA
+    )

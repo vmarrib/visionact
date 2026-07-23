@@ -24,6 +24,17 @@
 > `risk-check-http.ts`: retry automático com backoff exponencial,
 > respeitando o cabeçalho `Retry-After` quando presente, antes de mostrar o
 > erro ao visitante.
+>
+> **Correção registrada (2)**: rodando este showcase de verdade num
+> workspace Databricks com compute serverless, `sources.py` e
+> `media_check.py` falharam com `[NOT_IMPLEMENTED] Using custom code using
+> PySpark RDDs is not allowed on serverless compute` — serverless não
+> expõe a API de RDD "crua" (`df.rdd.mapPartitions(...)`), só a API de
+> DataFrame. Os dois arquivos foram reescritos para usar
+> `DataFrame.mapInPandas(...)`, que preserva a mesma estratégia (uma
+> conexão HTTP por partição, não por linha) de forma compatível com
+> serverless — considerada, inclusive, uma prática mais moderna que RDD
+> puro mesmo fora desse contexto.
 
 ## Problema
 
@@ -65,7 +76,7 @@ Consultar uma contraparte por vez, em sequência, é aceitável para uma
 análise pontual — mas se torna proibitivamente lento para revisar uma
 carteira inteira periodicamente. O lote de contrapartes é distribuído entre
 partições do Spark, e a consulta a cada fonte roda em paralelo por partição
-(`mapPartitions`, ver `sources.py`), reutilizando a mesma conexão HTTP para
+(`mapInPandas`, ver `sources.py`), reutilizando a mesma conexão HTTP para
 todas as linhas de uma partição em vez de abrir uma conexão por linha — a
 diferença entre um job que leva minutos e um que levaria horas num loop
 sequencial.
@@ -112,7 +123,7 @@ sem cluster**
 Cada módulo (`sources.py`, `media_check.py`, `rules_engine.py`) segue o
 mesmo padrão: a lógica pura (decisão de retry, normalização de texto,
 avaliação de regras) fica no topo do arquivo, sem importar PySpark; a
-integração com Spark (`mapPartitions`, `DataFrame`, `UDF`) fica isolada no
+integração com Spark (`mapInPandas`, `DataFrame`, `UDF`) fica isolada no
 final, importando PySpark só ali dentro. Isso é o que torna os 29 testes em
 `test_*.py` executáveis com `pytest` puro, sem PySpark nem Java instalados —
 uma escolha deliberada para que a lógica de negócio seja testada em
@@ -131,7 +142,7 @@ para os testes.
   o dossiê final. (Requer PySpark para rodar de verdade.)
 - [`sources.py`](./sources.py) — conectores de fontes estruturadas: lógica
   pura de retry/interpretação de resposta no topo, integração Spark
-  (`mapPartitions`) no final.
+  (`mapInPandas`, compatível com serverless) no final.
 - [`media_check.py`](./media_check.py) — checagem de mídia adversa: busca,
   normalização, dedup, casamento de regras e cálculo de intensidade —
   mesma separação lógica pura / integração Spark.

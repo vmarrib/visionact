@@ -8,16 +8,27 @@ paralelismo e tratamento de falha parcial, que é a mesma usada em produção
 (ali implementada em TypeScript com Promise.allSettled; aqui expressa em
 PySpark para o cenário de checagem em lote).
 
-Decisão de arquitetura, parte 1 — por que mapPartitions e não um UDF comum?
+Decisão de arquitetura, parte 1 — por que mapInPandas e não um UDF comum?
 
 Um UDF do Spark roda uma vez POR LINHA. Se cada linha abrir sua própria
 conexão HTTP, um lote de 10.000 contrapartes abre 10.000 conexões —
 desperdício de handshake TLS repetido e risco real de estourar limite de
-conexões simultâneas do lado da fonte externa. `mapPartitions` roda uma vez
-POR PARTIÇÃO: a conexão (ou sessão HTTP com keep-alive) é criada uma vez no
-início da partição e reaproveitada para todas as linhas dali, com o
-paralelismo vindo do número de partições processadas simultaneamente pelo
-cluster, não do número de linhas.
+conexões simultâneas do lado da fonte externa. `mapInPandas` roda uma vez
+POR PARTIÇÃO (recebendo um iterador de lotes pandas, não linha a linha): a
+conexão (ou sessão HTTP com keep-alive) é criada uma vez no início da
+partição e reaproveitada para todas as linhas dali, com o paralelismo
+vindo do número de partições processadas simultaneamente pelo cluster, não
+do número de linhas.
+
+Correção registrada: a primeira versão deste arquivo usava
+`df.rdd.mapPartitions(...)` (API de RDD "crua"). Rodando de verdade num
+workspace Databricks com compute **serverless**, isso falhou com
+`[NOT_IMPLEMENTED] Using custom code using PySpark RDDs is not allowed on
+serverless compute` — serverless não expõe a API de RDD, só a de
+DataFrame. `mapInPandas` (DataFrame-native, mesma ideia de "uma função por
+partição") é o substituto sugerido pela própria mensagem de erro, funciona
+em serverless, e não perde nada da estratégia original de reaproveitar
+conexão por partição.
 
 Decisão de arquitetura, parte 2 — por que PySpark só é importado DENTRO das
 funções que o usam, e não no topo do arquivo?
@@ -144,20 +155,26 @@ def _to_signal_row(source: StructuredSource, document_id: str, result: dict) -> 
 # ---------------------------------------------------------------------------
 
 
-def _process_partition(source: StructuredSource):
+def _process_partition_pandas(source: StructuredSource):
     """
-    Fábrica de função para `mapPartitions`: cria UMA sessão HTTP por
-    partição (não por linha) e a reaproveita para todas as linhas.
+    Fábrica de função para `mapInPandas`: cria UMA sessão HTTP por
+    partição (não por linha) e a reaproveita para todas as linhas — mesma
+    ideia de um `mapPartitions` de RDD, só que operando sobre lotes
+    pandas, o que a torna compatível com compute serverless.
     """
 
-    def process(rows: Iterator) -> Iterator[dict]:
+    def process(batches: Iterator) -> Iterator:
+        import pandas as pd
         import requests  # import local: só necessário nos workers, não no driver
 
         session = requests.Session()
         try:
-            for row in rows:
-                result = _query_source_with_retry(session, source, row.document_id)
-                yield _to_signal_row(source, row.document_id, result)
+            for batch_df in batches:
+                rows = [
+                    _to_signal_row(source, document_id, _query_source_with_retry(session, source, document_id))
+                    for document_id in batch_df["document_id"]
+                ]
+                yield pd.DataFrame(rows)
         finally:
             session.close()
 
@@ -168,7 +185,7 @@ def fetch_structured_signals(spark, batch, sources: list[StructuredSource] = EXA
     """
     Consulta todas as fontes estruturadas configuradas para o lote inteiro.
 
-    Cada fonte gera seu próprio DataFrame de sinais (via mapPartitions) e os
+    Cada fonte gera seu próprio DataFrame de sinais (via mapInPandas) e os
     resultados são unidos — falha em uma fonte não afeta as demais, e o
     dossiê final ainda é gerado com o que estiver disponível.
     """
@@ -177,8 +194,9 @@ def fetch_structured_signals(spark, batch, sources: list[StructuredSource] = EXA
     all_signals = None
 
     for source in sources:
-        partial = batch.select("document_id").rdd.mapPartitions(_process_partition(source))
-        partial_df = spark.createDataFrame(partial, schema=SIGNAL_SCHEMA)
+        partial_df = batch.select("document_id").mapInPandas(
+            _process_partition_pandas(source), schema=SIGNAL_SCHEMA
+        )
         all_signals = partial_df if all_signals is None else all_signals.unionByName(partial_df)
 
     assert all_signals is not None, "nenhuma fonte configurada"

@@ -55,7 +55,7 @@ export function ChecagemDeRisco() {
                   <p className="mb-2">Cada fonte pública tem seu próprio formato e modo de falha:</p>
                   <BulletList
                     items={[
-                      "Paralelizadas via mapPartitions, não um loop sequencial",
+                      "Paralelizadas via mapInPandas, não um loop sequencial",
                       "Falha parcial não derruba as demais fontes",
                     ]}
                   />
@@ -116,7 +116,7 @@ rule_version      string`}
       <Section label="Testabilidade" title="Lógica de negócio testável sem cluster">
         <p className="text-muted-foreground">
           Cada módulo separa a lógica pura (retry, normalização de texto, avaliação de regras) da
-          integração com Spark (`mapPartitions`, `DataFrame`, UDFs) — a primeira nunca importa
+          integração com Spark (`mapInPandas`, `DataFrame`, UDFs) — a primeira nunca importa
           PySpark. Resultado: 29 testes cobrindo cada decisão de negócio (o que conta como
           "não encontrado" vs. "fonte fora do ar", saturação da intensidade de mídia, veto vs.
           score ponderado) rodam com <code className="text-xs">pytest</code> puro, em segundos,
