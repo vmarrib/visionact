@@ -30,7 +30,7 @@ export function PontoInteligente() {
         name={meta.name}
         tagline={meta.tagline}
         domain={meta.domain}
-        problem="Construído para uma indústria de alimentos com vendedores e trabalhadores externos, atuando em múltiplos locais e turnos. Prova de presença por digital falha com trabalho manual, crachá pode ser emprestado, e papel não resiste a uma disputa trabalhista. O sistema confirma, na mesma batida, que a pessoa está fisicamente no local certo e que é ela mesma — com cada tentativa, aprovada ou não, registrada e armazenada de forma segura."
+        problem="Construído para uma indústria de alimentos com vendedores e trabalhadores externos, em múltiplos locais e turnos. A exigência era dupla: uma prova de presença que resistisse a uma disputa trabalhista (digital falha com trabalho manual, crachá pode ser emprestado, papel não resiste) e geolocalização confiável para quem trabalha fora da planta, não só dentro dela. O sistema confirma, na mesma batida, que a pessoa está fisicamente no local certo e que é ela mesma — cada tentativa, aprovada ou não, registrada e armazenada de forma segura."
         stack={meta.stack}
         github={meta.github}
       />
