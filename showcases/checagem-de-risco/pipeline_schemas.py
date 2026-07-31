@@ -1,15 +1,17 @@
 """
-Checagem de Risco — schemas Spark de saída, um por matriz (KYS/KYE/KYC).
+Checagem de Risco — schemas Spark de saída, um por conjunto de regras de
+análise de risco (KYS/KYE/KYC).
 
 Isolado num módulo próprio pelo mesmo motivo de sempre neste showcase: só
 aqui se importa PySpark, então `diligence_pipeline.py` (a lógica de
 verdade) continua testável com pytest puro.
 
 Cada schema tem um núcleo comum (documento, score, veto, recomendação,
-regras/categorias sinalizadas) mais só os campos de bureau que aquela
-matriz de fato usa — reflexo direto de `compliance_engine.<MATRIZ>.regras`.
-A KYC ainda carrega os 4 sub-scores dos modelos de crédito, além do score
-de crédito final: é a única matriz com camada de crédito.
+regras/categorias sinalizadas) mais só os campos de bureau que aquele
+conjunto de regras de fato usa — reflexo direto de
+`compliance_engine.KYS_RULES/KYE_RULES/KYC_RULES.regras`. O KYC ainda
+carrega os 4 sub-scores dos modelos de crédito, além do score de crédito
+final: é o único conjunto de regras com camada de crédito.
 """
 
 from pyspark.sql.types import (
@@ -32,7 +34,7 @@ _CAMPOS_COMUNS = [
     StructField("flagged_rules", ArrayType(StringType()), nullable=False),
     StructField("media_categorias_sinalizadas", ArrayType(StringType()), nullable=False),
     StructField("generated_at", TimestampType(), nullable=False),
-    StructField("matrix_version", StringType(), nullable=False),
+    StructField("rule_set_version", StringType(), nullable=False),
 ]
 
 KYS_OUTPUT_SCHEMA = StructType(

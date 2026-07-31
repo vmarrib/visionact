@@ -31,7 +31,7 @@ export function ChecagemDeRisco() {
         </p>
       </Section>
 
-      <Section label="3 matrizes" title="KYS, KYE, KYC: mesma engine, regras diferentes">
+      <Section label="Regras de análise de risco" title="KYS, KYE, KYC: mesma engine, regras diferentes">
         <FeatureCards
           features={[
             {
@@ -63,7 +63,7 @@ export function ChecagemDeRisco() {
                   Compliance básico (sanção, situação cadastral, dívida ativa) + mídia em 2
                   categorias essenciais, <strong>mais os 4 modelos de crédito embarcados</strong> por
                   cima — capacidade de pagamento, comportamento de pagamento, estabilidade
-                  cadastral, concentração setorial. Única matriz com camada de crédito.
+                  cadastral, concentração setorial. Único conjunto de regras com camada de crédito.
                 </p>
               ),
             },
@@ -90,8 +90,8 @@ export function ChecagemDeRisco() {
           do sinal satura a partir de 3 artigos corroborantes — uma menção isolada pesa menos que
           três reportagens independentes sobre o mesmo assunto. Categorias de maior severidade
           (lavagem de dinheiro, sanção internacional, crime organizado) viram veto automático; as
-          demais contribuem ponderadamente. Cada matriz varre só o subconjunto de categorias que
-          faz sentido para aquele papel.
+          demais contribuem ponderadamente. Cada conjunto de regras varre só o subconjunto de
+          categorias que faz sentido para aquele papel.
         </p>
         <CodeBlock
           filename="exemplo de query gerada (media_check_categories.py)"
@@ -100,11 +100,11 @@ export function ChecagemDeRisco() {
         />
       </Section>
 
-      <Section label="Resultado" title="3 DataFrames, um por matriz — não um documento">
+      <Section label="Resultado" title="3 DataFrames, um por conjunto de regras — não um documento">
         <p className="mb-4 text-muted-foreground">
-          A entrada de cada matriz é um lote de CNPJ/CPF; a saída é uma tabela tipada, pronta para
-          um data warehouse ou dashboard de BI. Cada matriz tem seu próprio schema — só os campos de
-          bureau que ela de fato usa — em vez de um mapa genérico.
+          A entrada de cada conjunto de regras é um lote de CNPJ/CPF; a saída é uma tabela tipada,
+          pronta para um data warehouse ou dashboard de BI. Cada um tem seu próprio schema — só os
+          campos de bureau que ele de fato usa — em vez de um mapa genérico.
         </p>
         <CodeBlock
           filename="KYC (schema de saída — inclui a análise de crédito)"
@@ -123,7 +123,7 @@ score_estabilidade_cadastral   double
 score_concentracao_setorial    double
 score_credito_final            double
 generated_at                   timestamp
-matrix_version                 string`}
+rule_set_version               string`}
         />
       </Section>
 
@@ -133,18 +133,18 @@ matrix_version                 string`}
           de crédito) da integração com Spark (<code className="text-xs">mapInPandas</code>,{" "}
           <code className="text-xs">DataFrame</code>) — a primeira nunca importa PySpark. Resultado:
           57 testes cobrindo cada decisão de negócio (veto vs. score ponderado, saturação da
-          intensidade de mídia, os 4 modelos de crédito, o contrato de schema entre matriz e
+          intensidade de mídia, os 4 modelos de crédito, o contrato de schema entre regras e
           DataFrame de saída) rodam com <code className="text-xs">pytest</code> puro, em menos de 1
           segundo, sem precisar subir Spark nem Java.
         </p>
       </Section>
 
-      <Section label="Arquitetura" title="Do bureau às 3 matrizes">
+      <Section label="Arquitetura" title="Do bureau às regras de análise de risco">
         <FlowDiagram
           steps={[
             "Lote de contrapartes (documento, nome)",
             "Bureau de dados cadastrais/creditícios",
-            "Compliance por campo + checagem de mídia (por matriz)",
+            "Compliance por campo + checagem de mídia (por conjunto de regras)",
             "KYC: + 4 modelos de crédito embarcados",
             "3 DataFrames de saída (KYS, KYE, KYC)",
           ]}

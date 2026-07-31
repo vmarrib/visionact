@@ -3,8 +3,8 @@ Checagem de Risco — cliente do bureau de dados cadastrais/creditícios.
 
 Este módulo modela **um** bureau de crédito/cadastro — o tipo de fonte que
 devolve, para um único CNPJ ou CPF, um payload rico com dados cadastrais,
-judiciais e financeiros. É esse payload que alimenta as 3 matrizes
-(KYS/KYE/KYC) e os 4 modelos de crédito.
+judiciais e financeiros. É esse payload que alimenta as 3 regras de
+análise de risco (KYS/KYE/KYC) e os 4 modelos de crédito.
 
 Como sempre neste showcase: nomes reais de bureau, endpoints, campos e
 limiares de produção foram substituídos por um formato ilustrativo. A
@@ -24,9 +24,10 @@ from typing import Protocol
 class BureauRecord:
     """Registro normalizado de bureau para um único documento (CNPJ ou CPF).
 
-    Os campos cobrem as três dimensões usadas pelas matrizes: cadastral
-    (KYS/KYE), judicial/compliance (KYS/KYE/KYC) e financeira (KYC/modelos
-    de crédito) — um único registro alimenta as três análises.
+    Os campos cobrem as três dimensões usadas pelas regras de análise de
+    risco: cadastral (KYS/KYE), judicial/compliance (KYS/KYE/KYC) e
+    financeira (KYC/modelos de crédito) — um único registro alimenta as
+    três análises.
     """
 
     documento: str

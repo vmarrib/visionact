@@ -29,7 +29,7 @@ export const projects: ProjectMeta[] = [
     name: "Checagem de Risco",
     tagline: "Due diligence em lote com PySpark: KYS, KYE e KYC",
     description:
-      "Pipeline PySpark que roda 3 matrizes de risco configuráveis por papel da contraparte (fornecedor, colaborador, cliente) sobre dados de bureau e checagem de mídia adversa por categoria, com 4 modelos de crédito embarcados na camada de cliente — saída em 3 DataFrames tipados, um por matriz.",
+      "Pipeline PySpark que roda 3 regras de análise de risco configuráveis por papel da contraparte (fornecedor, colaborador, cliente) sobre dados de bureau e checagem de mídia adversa por categoria, com 4 modelos de crédito embarcados na camada de cliente — saída em 3 DataFrames tipados, um por conjunto de regras.",
     domain: "Data Engineering · Risk & Compliance",
     stack: ["PySpark", "Python", "Pandas", "pytest"],
     accent: "Regulatory grade",
@@ -55,7 +55,7 @@ export const profile = {
   name: "Vanessa M. Ribeiro",
   role: "Engenheira & Cientista de Dados",
   summary:
-    "Construo sistemas de dados de ponta a ponta para domínios sensíveis do mundo real — saúde, compliance e biometria — com modelagem de acesso rigorosa (Row Level Security não-trivial) desde o design do schema. Três projetos em produção: unificação de dados de saúde com IA de contexto, due diligence B2B com matrizes de risco por papel de contraparte e modelos de crédito embarcados, e gestão de jornada com geolocalização e visão computacional calibradas estatisticamente.",
+    "Construo sistemas de dados de ponta a ponta para domínios sensíveis do mundo real — saúde, compliance e biometria — com modelagem de acesso rigorosa (Row Level Security não-trivial) desde o design do schema. Três projetos em produção: unificação de dados de saúde com IA de contexto, due diligence B2B com regras de análise de risco por papel de contraparte e modelos de crédito embarcados, e gestão de jornada com geolocalização e visão computacional calibradas estatisticamente.",
   email: "contato@visionact.org",
   phone: "+55 48 99167-4257",
   github: "https://github.com/vmarrib/visionact",

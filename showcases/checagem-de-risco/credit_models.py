@@ -4,7 +4,7 @@ Checagem de Risco — 4 modelos de crédito embarcados (camada KYC).
 Os dados de crédito vêm de um bureau externo via API (`bureau_client.py`) e
 alimentam 4 modelos determinísticos independentes, cada um olhando para uma
 dimensão diferente de risco de crédito. O resultado combinado é a "análise
-de crédito" usada pela matriz KYC.
+de crédito" usada pelas regras de análise de risco do KYC.
 
 Determinístico/scorecard em vez de um modelo treinado por uma razão
 concreta: este showcase não tem uma base de inadimplência real rotulada
@@ -133,7 +133,7 @@ def modelo_concentracao_setorial(record: BureauRecord) -> CreditModelResult:
 def run_credit_models(record: BureauRecord) -> CreditAnalysis:
     """Roda os 4 modelos embarcados e combina o resultado num score único
     de crédito, ponderado por PESOS_MODELOS. Esta é a "análise de crédito"
-    consumida pela matriz KYC."""
+    consumida pelas regras de análise de risco do KYC."""
     modelos = (
         modelo_capacidade_pagamento(record),
         modelo_comportamento_pagamento(record),

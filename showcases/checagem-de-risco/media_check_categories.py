@@ -10,10 +10,11 @@ categoria) e como transformar nº de artigos corroborantes numa intensidade
 de 0 a 1 — a execução de verdade da busca (crawler/API de busca) fica de
 fora do escopo deste showcase.
 
-A taxonomia abaixo é a mesma usada para compor o escopo de cada matriz:
-KYS (fornecedor) varre todas as categorias; KYE (colaborador) varre um
-subconjunto voltado a envolvimento pessoal/criminal; KYC (cliente) usa a
-checagem de compliance básica. Ver `compliance_engine.py`.
+A taxonomia abaixo é a mesma usada para compor o escopo de cada conjunto
+de regras de análise de risco: KYS (fornecedor) varre todas as categorias;
+KYE (colaborador) varre um subconjunto voltado a envolvimento
+pessoal/criminal; KYC (cliente) usa a checagem de compliance básica. Ver
+`compliance_engine.py`.
 """
 
 from __future__ import annotations
@@ -139,7 +140,7 @@ def build_media_search_queries(
     """Monta uma query de busca por grupo de palavras-chave, por categoria
     — nome da contraparte entre aspas (busca exata) + termos do grupo em
     OR. `category_ids=None` cobre a taxonomia inteira (escopo KYS);
-    matrizes mais restritas (KYE) passam um subconjunto."""
+    conjuntos de regras mais restritos (KYE) passam um subconjunto."""
     categorias = MEDIA_CATEGORIES if category_ids is None else tuple(get_category(cid) for cid in category_ids)
     queries: list[MediaSearchQuery] = []
     for categoria in categorias:

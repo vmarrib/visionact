@@ -1,5 +1,6 @@
 """
-Checagem de Risco — motor de compliance por campo + as 3 matrizes (KYS/KYE/KYC).
+Checagem de Risco — motor de compliance por campo + as 3 regras de análise
+de risco (KYS/KYE/KYC).
 
 Cada regra observa diretamente um campo do `BureauRecord` (não um "sinal"
 abstrato) ou uma categoria sinalizada da checagem de mídia — a decisão de
@@ -20,12 +21,13 @@ As 3 configurações:
 - **KYC** (Know Your Client / Cliente) — compliance básico por campo +
   checagem de mídia num escopo de compliance essencial (sanções,
   lavagem de dinheiro), **mais** os 4 modelos de crédito embarcados
-  (`credit_models.py`) por cima — é a única matriz com camada de crédito,
-  porque cliente é quem efetivamente representa exposição financeira.
+  (`credit_models.py`) por cima — são as únicas regras de análise de risco
+  com camada de crédito, porque cliente é quem efetivamente representa
+  exposição financeira.
 
 Regra é veto (reprovação automática, independente do score) ou ponderada
 (soma proporcional ao peso da regra, normalizada pela soma de pesos
-possíveis). Score final combina compliance + crédito só na matriz KYC.
+possíveis). Score final combina compliance + crédito só no KYC.
 """
 
 from __future__ import annotations
@@ -37,17 +39,17 @@ from bureau_client import BureauRecord
 from credit_models import CreditAnalysis, run_credit_models
 from media_check_categories import MEDIA_CATEGORIES, MediaCheckCategoryResult
 
-# Peso de compliance x crédito no score final da matriz KYC — crédito pesa
-# mais porque é o propósito central de uma análise de cliente, mas
-# compliance básico continua contribuindo (evita aprovar por crédito bom
-# uma contraparte com pendência de compliance).
+# Peso de compliance x crédito no score final do KYC — crédito pesa mais
+# porque é o propósito central de uma análise de cliente, mas compliance
+# básico continua contribuindo (evita aprovar por crédito bom uma
+# contraparte com pendência de compliance).
 PESO_COMPLIANCE_NO_SCORE_KYC = 0.4
 PESO_CREDITO_NO_SCORE_KYC = 0.6
 
 LIMIAR_REJEICAO = 0.66
 LIMIAR_REVISAO_MANUAL = 0.33
 
-# Score de crédito, isolado, acima do qual a KYC rejeita automaticamente —
+# Score de crédito, isolado, acima do qual o KYC rejeita automaticamente —
 # mesmo sem nenhum achado de compliance. Sem este limiar independente, o
 # peso de crédito (0.6) nunca sozinho atingiria LIMIAR_REJEICAO (0.66) no
 # score combinado, o que deixaria uma contraparte de risco de crédito
@@ -175,11 +177,11 @@ MEDIA_RULES_BY_CATEGORY: dict[str, ComplianceRule] = {
 }
 
 
-# --- As 3 matrizes ---------------------------------------------------------
+# --- As 3 regras de análise de risco (KYS/KYE/KYC) ------------------------
 
 
 @dataclass(frozen=True)
-class ComplianceMatrix:
+class RiskAnalysisRules:
     id: str
     nome: str
     regras: tuple[ComplianceRule, ...]
@@ -203,7 +205,7 @@ KYC_MEDIA_SCOPE: tuple[str, ...] = (
 )
 
 
-KYS_MATRIX = ComplianceMatrix(
+KYS_RULES = RiskAnalysisRules(
     id="kys",
     nome="KYS — Know Your Supplier (Fornecedor)",
     regras=(
@@ -221,7 +223,7 @@ KYS_MATRIX = ComplianceMatrix(
     usa_modelos_credito=False,
 )
 
-KYE_MATRIX = ComplianceMatrix(
+KYE_RULES = RiskAnalysisRules(
     id="kye",
     nome="KYE — Know Your Employee (Colaborador)",
     regras=(
@@ -235,7 +237,7 @@ KYE_MATRIX = ComplianceMatrix(
     usa_modelos_credito=False,
 )
 
-KYC_MATRIX = ComplianceMatrix(
+KYC_RULES = RiskAnalysisRules(
     id="kyc",
     nome="KYC — Know Your Client (Cliente)",
     regras=(
@@ -262,8 +264,8 @@ class RuleOutcome:
 
 
 @dataclass(frozen=True)
-class MatrixResult:
-    matrix_id: str
+class RiskAnalysisResult:
+    rule_set_id: str
     score: float  # 0 a 1
     veto: bool
     recommendation: str  # "approve" | "manual_review" | "reject"
@@ -275,8 +277,8 @@ class MatrixResult:
 
 
 def _extrair_campos_para_analise(record: BureauRecord, regras: tuple[ComplianceRule, ...]) -> dict:
-    """Reúne, a partir das regras da matriz, só os campos do bureau
-    realmente usados nela — o analista revisa a decisão sem precisar do
+    """Reúne, a partir das regras aplicadas, só os campos do bureau
+    realmente usados nelas — o analista revisa a decisão sem precisar do
     registro inteiro."""
     campos: dict = {"documento": record.documento, "tipo_documento": record.tipo_documento}
     for regra in regras:
@@ -285,15 +287,15 @@ def _extrair_campos_para_analise(record: BureauRecord, regras: tuple[ComplianceR
     return campos
 
 
-def avaliar_matriz(
-    matrix: ComplianceMatrix,
+def avaliar_regras(
+    conjunto: RiskAnalysisRules,
     record: BureauRecord,
     media_resultados: tuple[MediaCheckCategoryResult, ...],
-) -> MatrixResult:
+) -> RiskAnalysisResult:
     ctx = ComplianceContext(record=record, media_resultados=media_resultados)
     outcomes = tuple(
         RuleOutcome(rule_id=r.id, descricao=r.descricao, tipo=r.tipo, disparada=r.avaliar(ctx), peso=r.peso)
-        for r in matrix.regras
+        for r in conjunto.regras
     )
 
     veto = any(o.disparada for o in outcomes if o.tipo == "veto")
@@ -302,7 +304,7 @@ def avaliar_matriz(
     soma_pesos = sum(o.peso for o in ponderadas)
     score_compliance = (sum(o.peso for o in ponderadas if o.disparada) / soma_pesos) if soma_pesos > 0 else 0.0
 
-    analise_credito = run_credit_models(record) if matrix.usa_modelos_credito else None
+    analise_credito = run_credit_models(record) if conjunto.usa_modelos_credito else None
     if analise_credito is not None:
         score = (score_compliance * PESO_COMPLIANCE_NO_SCORE_KYC) + (
             analise_credito.score_credito_final * PESO_CREDITO_NO_SCORE_KYC
@@ -320,14 +322,14 @@ def avaliar_matriz(
     else:
         recommendation = "approve"
 
-    return MatrixResult(
-        matrix_id=matrix.id,
+    return RiskAnalysisResult(
+        rule_set_id=conjunto.id,
         score=score,
         veto=veto,
         recommendation=recommendation,
         flagged_rules=tuple(o.rule_id for o in outcomes if o.disparada),
         rule_outcomes=outcomes,
-        campos_para_analise=_extrair_campos_para_analise(record, matrix.regras),
+        campos_para_analise=_extrair_campos_para_analise(record, conjunto.regras),
         media_resultados=media_resultados,
         analise_credito=analise_credito,
     )

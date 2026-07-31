@@ -7,13 +7,13 @@ importa PySpark) — se alguém renomear um `campo` em `compliance_engine.py`
 sem atualizar `pipeline_schemas.py`, é este teste que denuncia o desvio.
 """
 
-from compliance_engine import KYC_MATRIX, KYE_MATRIX, KYS_MATRIX, avaliar_matriz
+from compliance_engine import KYC_RULES, KYE_RULES, KYS_RULES
 from diligence_pipeline import analisar_contraparte, build_output_row, contar_artigos_por_categoria
 from media_check_categories import avaliar_media_check
 
 KYS_COLUNAS_ESPERADAS = {
     "documento", "tipo_documento", "score", "veto", "recommendation", "flagged_rules",
-    "media_categorias_sinalizadas", "generated_at", "matrix_version",
+    "media_categorias_sinalizadas", "generated_at", "rule_set_version",
     "possui_sancao_ativa", "mandados_prisao_ativos", "processos_criminais",
     "situacao_cadastral", "tempo_atividade_meses", "quantidade_socios",
     "processos_civeis", "divida_ativa",
@@ -21,13 +21,13 @@ KYS_COLUNAS_ESPERADAS = {
 
 KYE_COLUNAS_ESPERADAS = {
     "documento", "tipo_documento", "score", "veto", "recommendation", "flagged_rules",
-    "media_categorias_sinalizadas", "generated_at", "matrix_version",
+    "media_categorias_sinalizadas", "generated_at", "rule_set_version",
     "mandados_prisao_ativos", "processos_criminais", "processos_trabalhistas", "processos_civeis",
 }
 
 KYC_COLUNAS_ESPERADAS = {
     "documento", "tipo_documento", "score", "veto", "recommendation", "flagged_rules",
-    "media_categorias_sinalizadas", "generated_at", "matrix_version",
+    "media_categorias_sinalizadas", "generated_at", "rule_set_version",
     "possui_sancao_ativa", "situacao_cadastral", "divida_ativa",
     "score_capacidade_pagamento", "score_comportamento_pagamento",
     "score_estabilidade_cadastral", "score_concentracao_setorial", "score_credito_final",
@@ -76,7 +76,7 @@ def test_contar_artigos_por_categoria_sem_corroboracao():
 def test_build_output_row_kys_bate_com_schema_esperado():
     session = _FakeSession({"nome": "Fornecedor Exemplo LTDA", "situacao_cadastral": "ATIVA"})
     row = analisar_contraparte(
-        KYS_MATRIX, "12345678000199", "Fornecedor Exemplo LTDA", session, "https://fake", _executor_zero
+        KYS_RULES, "12345678000199", "Fornecedor Exemplo LTDA", session, "https://fake", _executor_zero
     )
     assert set(row.keys()) == KYS_COLUNAS_ESPERADAS
 
@@ -84,7 +84,7 @@ def test_build_output_row_kys_bate_com_schema_esperado():
 def test_build_output_row_kye_bate_com_schema_esperado():
     session = _FakeSession({"tipo_documento": "PF", "nome": "Colaborador Exemplo"})
     row = analisar_contraparte(
-        KYE_MATRIX, "12345678900", "Colaborador Exemplo", session, "https://fake", _executor_zero
+        KYE_RULES, "12345678900", "Colaborador Exemplo", session, "https://fake", _executor_zero
     )
     assert set(row.keys()) == KYE_COLUNAS_ESPERADAS
 
@@ -92,7 +92,7 @@ def test_build_output_row_kye_bate_com_schema_esperado():
 def test_build_output_row_kyc_bate_com_schema_esperado():
     session = _FakeSession({"nome": "Cliente Exemplo LTDA"})
     row = analisar_contraparte(
-        KYC_MATRIX, "12345678000199", "Cliente Exemplo LTDA", session, "https://fake", _executor_zero
+        KYC_RULES, "12345678000199", "Cliente Exemplo LTDA", session, "https://fake", _executor_zero
     )
     assert set(row.keys()) == KYC_COLUNAS_ESPERADAS
 
@@ -107,7 +107,7 @@ def test_analisar_contraparte_kyc_traz_analise_de_credito_completa():
         }
     )
     row = analisar_contraparte(
-        KYC_MATRIX, "12345678000199", "Cliente Exemplo LTDA", session, "https://fake", _executor_zero
+        KYC_RULES, "12345678000199", "Cliente Exemplo LTDA", session, "https://fake", _executor_zero
     )
     assert 0.0 <= row["score_credito_final"] <= 1.0
     assert row["score_capacidade_pagamento"] == 0.1  # 50k / 500k
@@ -120,7 +120,7 @@ def test_analisar_contraparte_kys_veto_por_midia_lavagem_dinheiro():
         return 3 if "lavagem de dinheiro" in query else 0
 
     row = analisar_contraparte(
-        KYS_MATRIX, "12345678000199", "Fornecedor Exemplo LTDA", session, "https://fake", executor_sinaliza_lavagem
+        KYS_RULES, "12345678000199", "Fornecedor Exemplo LTDA", session, "https://fake", executor_sinaliza_lavagem
     )
     assert row["veto"] is True
     assert row["recommendation"] == "reject"
@@ -133,11 +133,11 @@ def test_analisar_contraparte_documento_nao_encontrado_no_bureau_e_conservador()
             return _FakeResponse(404)
 
     row = analisar_contraparte(
-        KYS_MATRIX, "00000000000000", "Desconhecido LTDA", _SessaoNaoEncontrado(), "https://fake", _executor_zero
+        KYS_RULES, "00000000000000", "Desconhecido LTDA", _SessaoNaoEncontrado(), "https://fake", _executor_zero
     )
     assert row["situacao_cadastral"] == "DESCONHECIDA"
     # sem informação de bureau não deveria virar aprovação automática por
-    # ausência de achado — mas também não é um veto automático nesta
-    # matriz; verificamos aqui que o campo reflete o estado real, não um
-    # otimismo indevido
+    # ausência de achado — mas também não é um veto automático neste
+    # conjunto de regras; verificamos aqui que o campo reflete o estado
+    # real, não um otimismo indevido
     assert row["divida_ativa"] == 0.0
