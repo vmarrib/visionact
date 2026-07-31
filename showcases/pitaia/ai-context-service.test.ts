@@ -1,13 +1,6 @@
 /**
- * Testes de `ai-context-service.ts`.
- *
- * Sintaxe Vitest (mesmo runner usado no projeto real). Este ambiente de
- * portfólio não tem Node instalado para executar os testes de verdade — ao
- * contrário dos testes Python de `checagem-de-risco/`, que foram rodados e
- * verificados com pytest. Para rodar estes localmente:
- *
- *   npm install --save-dev vitest
- *   npx vitest run ai-context-service.test.ts
+ * Testes de `ai-context-service.ts` — mesmo runner (Vitest) usado no
+ * projeto real. Rodar com `bun run test` na raiz do repositório.
  */
 
 import { describe, expect, it } from "vitest";

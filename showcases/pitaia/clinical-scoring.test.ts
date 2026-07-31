@@ -1,8 +1,6 @@
 /**
- * Testes de `clinical-scoring.ts`.
- *
- * Sintaxe Vitest — ver nota em `ai-context-service.test.ts` sobre rodar
- * estes testes localmente (este ambiente de portfólio não tem Node).
+ * Testes de `clinical-scoring.ts` — Vitest, rodar com `bun run test` na
+ * raiz do repositório.
  */
 
 import { describe, expect, it } from "vitest";

@@ -25,8 +25,8 @@ export function PitaIA() {
         <div className="flex flex-col items-start justify-between gap-4 rounded-lg border border-primary/30 bg-accent p-5 sm:flex-row sm:items-center">
           <div>
             <p className="font-semibold text-accent-foreground">
-              Diferente do Checagem de Risco (que tem uma demo embutida), o PitaIA é um produto
-              completo em produção — a forma mais honesta de mostrar é te mandar direto pra lá.
+              O PitaIA é um produto completo em produção, não uma simulação de portfólio — a
+              forma mais direta de avaliar é usar o app.
             </p>
             <p className="mt-1 text-sm text-accent-foreground/80">
               Cadastro gratuito, sem cartão de crédito.

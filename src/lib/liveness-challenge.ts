@@ -58,7 +58,7 @@ const MOUTH_OPEN_DELTA_RATIO = 0.15;
 const HEAD_TURN_DELTA_RATIO = 0.12;
 
 /**
- * `turn_head` aceita giro para QUALQUER lado — ver justificativa detalhada
+ * `turn_head` aceita giro para qualquer lado — ver justificativa detalhada
  * no showcase (evita depender de o vídeo estar espelhado ou não).
  */
 export function evaluateChallenge(

@@ -43,10 +43,17 @@ export interface FaceMatchResult {
  * Contexto de mercado: bancos miram FAR de 0.001%-0.1% com modelos
  * proprietários multi-modais (infravermelho, prova de vida); um descritor
  * de 128 números rodando no navegador é classe controle-de-acesso/ponto,
- * não classe bancária — vale documentar essa limitação, não escondê-la.
- * No sistema real, esse valor é configurável por organização.
+ * não classe bancária. No sistema real, esse valor é configurável por
+ * organização.
  */
 const SIMILARITY_THRESHOLD = 0.4;
+
+// Descritores de produção vêm de um Float32Array — um valor como 0.6 é
+// armazenado como 0.6000000238..., o suficiente para empurrar uma
+// similaridade exatamente no limiar para o lado errado da comparação.
+// Arredondar antes de comparar evita que precisão de ponto flutuante
+// decida uma aprovação biométrica.
+const SIMILARITY_PRECISION = 1e6;
 
 /**
  * Distância euclidiana entre dois descritores faciais, convertida em uma
@@ -68,7 +75,7 @@ export function compareFaceDescriptors(
 
   // Distância 0 = idêntico → similaridade 1. Normalização simples para uma
   // escala 0–1, mais legível numa auditoria do que uma distância crua.
-  const similarity = Math.max(0, 1 - distance);
+  const similarity = Math.round(Math.max(0, 1 - distance) * SIMILARITY_PRECISION) / SIMILARITY_PRECISION;
 
   return {
     similarity,

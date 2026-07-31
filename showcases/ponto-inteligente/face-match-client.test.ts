@@ -1,8 +1,6 @@
 /**
- * Testes de `face-match-client.ts`.
- *
- * Sintaxe Vitest — ver nota em `pitaia/ai-context-service.test.ts` sobre
- * rodar estes testes localmente (este ambiente de portfólio não tem Node).
+ * Testes de `face-match-client.ts` — Vitest, rodar com `bun run test` na
+ * raiz do repositório.
  */
 
 import { describe, expect, it, vi } from "vitest";
@@ -59,7 +57,7 @@ describe("compareFaceDescriptors", () => {
 });
 
 describe("prewarmFaceMatchModel", () => {
-  it("carrega o modelo ANTES de rodar a inferência de aquecimento, nessa ordem", () => {
+  it("carrega o modelo antes de rodar a inferência de aquecimento, nessa ordem", () => {
     const callOrder: string[] = [];
     const loadModel = vi.fn(async () => {
       callOrder.push("load");

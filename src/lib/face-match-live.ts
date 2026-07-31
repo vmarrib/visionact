@@ -1,6 +1,6 @@
 /**
- * Ponto Inteligente — reconhecimento facial rodando DE VERDADE no navegador
- * de quem está vendo o portfólio, não no servidor do site.
+ * Ponto Inteligente — reconhecimento facial rodando ao vivo no navegador de
+ * quem está vendo o portfólio, não no servidor do site.
  *
  * Mesmo pipeline de 3 estágios documentado em
  * `showcases/ponto-inteligente/` (TinyFaceDetector → FaceLandmark68Net →
@@ -78,7 +78,7 @@ function getFrameWidth(input: HTMLImageElement | HTMLCanvasElement | HTMLVideoEl
 }
 
 /**
- * Detecta um rosto na imagem/quadro fornecido e aplica a MESMA checagem de
+ * Detecta um rosto na imagem/quadro fornecido e aplica a mesma checagem de
  * qualidade do showcase (`assessFaceQuality`) antes de aceitar o
  * descritor — rejeitar aqui é o pipeline funcionando como projetado, não
  * um erro da demo.
@@ -216,15 +216,20 @@ export function describeQualityIssue(issue: FaceQualityIssue): string {
  * pela comunidade é distância euclidiana <= 0.6 para "mesma pessoa" — que,
  * nesta escala de similaridade (1 - distância), corresponde a >= 0.4.
  *
- * Para comparação de mercado: sistemas bancários/KYC mira taxas de falsa
+ * Para comparação de mercado: sistemas bancários/KYC miram taxas de falsa
  * aceitação (FAR) de 0.001%-0.1%, com modelos proprietários multi-modais
  * (infravermelho, prova de vida) muito além do que um descritor de 128
  * números rodando no navegador consegue garantir sozinho — este é um
- * modelo de classe "controle de acesso/ponto", não de classe bancária, e
- * documentar essa limitação é mais honesto do que fingir precisão que o
- * modelo não tem.
+ * modelo de classe "controle de acesso/ponto", não de classe bancária.
  */
 const SIMILARITY_THRESHOLD = 0.4;
+
+// Precisão de comparação: os descritores vêm de um Float32Array, então uma
+// entrada como 0.6 é armazenada como 0.6000000238... — suficiente para
+// empurrar uma similaridade exatamente no limiar (0.4) para o lado errado
+// por ~2e-8. Arredondar antes de comparar evita que artefato de ponto
+// flutuante decida uma aprovação biométrica.
+const SIMILARITY_PRECISION = 1e6;
 
 export interface FaceMatchResult {
   similarity: number;
@@ -240,7 +245,7 @@ export function compareDescriptors(a: Float32Array, b: Float32Array): FaceMatchR
   }
 
   const distance = Math.sqrt(sumSquares);
-  const similarity = Math.max(0, 1 - distance);
+  const similarity = Math.round(Math.max(0, 1 - distance) * SIMILARITY_PRECISION) / SIMILARITY_PRECISION;
 
   return { similarity, approved: similarity >= SIMILARITY_THRESHOLD };
 }

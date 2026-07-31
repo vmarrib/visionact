@@ -1,8 +1,6 @@
 /**
- * Testes de `face-match-pipeline.ts`.
- *
- * Sintaxe Vitest — ver nota em `pitaia/ai-context-service.test.ts` sobre
- * rodar estes testes localmente (este ambiente de portfólio não tem Node).
+ * Testes de `face-match-pipeline.ts` — Vitest, rodar com `bun run test` na
+ * raiz do repositório.
  */
 
 import { describe, expect, it } from "vitest";

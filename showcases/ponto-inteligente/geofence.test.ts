@@ -1,8 +1,6 @@
 /**
- * Testes de `geofence.ts`.
- *
- * Sintaxe Vitest — ver nota em `pitaia/ai-context-service.test.ts` sobre
- * rodar estes testes localmente (este ambiente de portfólio não tem Node).
+ * Testes de `geofence.ts` — Vitest, rodar com `bun run test` na raiz do
+ * repositório.
  *
  * As coordenadas de referência usadas aqui (Praça da Sé, em São Paulo, e um
  * ponto ~0,0105 grau de latitude ao sul) são públicas — a distância entre

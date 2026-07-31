@@ -8,7 +8,7 @@ palavras-chave, organizada por categoria de risco. Este módulo é só a
 lógica pura: como montar a busca (nome da contraparte + termos de cada
 categoria) e como transformar nº de artigos corroborantes numa intensidade
 de 0 a 1 — a execução de verdade da busca (crawler/API de busca) fica de
-fora do escopo deste showcase, assim como no antigo `media_check.py`.
+fora do escopo deste showcase.
 
 A taxonomia abaixo é a mesma usada para compor o escopo de cada matriz:
 KYS (fornecedor) varre todas as categorias; KYE (colaborador) varre um
@@ -157,8 +157,7 @@ def build_media_search_queries(
 
 def calcular_intensidade(artigos_corroborantes: int) -> float:
     """Converte contagem de artigos corroborantes numa intensidade 0-1,
-    crescimento linear até CORROBORACAO_TETO, depois saturando — mesmo
-    raciocínio do antigo `score_media_hits()`."""
+    crescimento linear até CORROBORACAO_TETO, depois saturando."""
     if artigos_corroborantes <= 0:
         return 0.0
     return round(min(1.0, artigos_corroborantes / CORROBORACAO_TETO), 4)

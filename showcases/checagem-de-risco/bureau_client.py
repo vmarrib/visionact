@@ -1,11 +1,10 @@
 """
 Checagem de Risco — cliente do bureau de dados cadastrais/creditícios.
 
-Diferente do antigo `sources.py` (que consultava várias fontes públicas
-heterogêneas para sinais de compliance), este módulo modela **um** bureau
-de crédito/cadastro — o tipo de fonte que devolve, para um único CNPJ ou
-CPF, um payload rico com dados cadastrais, judiciais e financeiros. É esse
-payload que alimenta as 3 matrizes (KYS/KYE/KYC) e os 4 modelos de crédito.
+Este módulo modela **um** bureau de crédito/cadastro — o tipo de fonte que
+devolve, para um único CNPJ ou CPF, um payload rico com dados cadastrais,
+judiciais e financeiros. É esse payload que alimenta as 3 matrizes
+(KYS/KYE/KYC) e os 4 modelos de crédito.
 
 Como sempre neste showcase: nomes reais de bureau, endpoints, campos e
 limiares de produção foram substituídos por um formato ilustrativo. A
@@ -18,7 +17,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import Optional, Protocol
+from typing import Protocol
 
 
 @dataclass(frozen=True)
@@ -80,8 +79,9 @@ def _registro_nao_encontrado(documento: str, tipo_documento: str) -> BureauRecor
 
 
 def infer_tipo_documento(documento: str) -> str:
-    """CPF tem 11 dígitos, CNPJ tem 14 — a mesma heurística usada pela
-    demo antiga de BrasilAPI, sem hífen/pontuação."""
+    """CPF tem 11 dígitos, CNPJ tem 14, já sem hífen/pontuação — o
+    payload do bureau normalmente informa `tipo_documento` explicitamente,
+    esta heurística cobre o caso em que ele vem ausente."""
     digitos = "".join(c for c in documento if c.isdigit())
     return "PF" if len(digitos) <= 11 else "PJ"
 

@@ -113,9 +113,9 @@ descritor de 128 números no navegador é classe controle-de-acesso/ponto,
 não classe bancária.
 
 **Vulnerabilidade encontrada e corrigida: prova de vivacidade**
-Testando a demo ao vivo, uma FOTO estática aproximada da câmera foi
-aprovada como "mesma pessoa" — o FaceMatch confirma QUEM está na imagem,
-mas nunca verificava SE a captura vinha de uma pessoa real, ao vivo. Essa
+Testando a demo ao vivo, uma foto estática aproximada da câmera foi
+aprovada como "mesma pessoa" — o FaceMatch confirma quem está na imagem,
+mas nunca verificava se a captura vinha de uma pessoa real, ao vivo. Essa
 classe de vulnerabilidade se chama **ataque de apresentação**
 (presentation attack), bem documentada na literatura de biometria facial.
 
@@ -142,7 +142,7 @@ Raio para aceitar 99% das leituras legítimas: 74.3 m
 ```
 
 Os 59 testes deste showcase (18 em Python + 41 em Vitest, ver seção de
-arquivos) — os de Python foram rodados de verdade, com `pytest`.
+arquivos) rodam com `pytest` e `vitest` respectivamente.
 
 ## Decisões técnicas e alternativas consideradas
 
@@ -173,7 +173,7 @@ resultado (similaridade, aprovado/reprovado) é enviado ao servidor. Ver
 
 **4. Checagem de qualidade antes de extrair o descritor facial**
 Detectar mais de um rosto no quadro, confiança de detecção baixa, ou um
-rosto pequeno demais no enquadramento são rejeitados ANTES de tentar
+rosto pequeno demais no enquadramento são rejeitados antes de tentar
 comparar — cada motivo de rejeição vira uma mensagem específica para o
 funcionário corrigir (ex.: "aproxime o rosto"), em vez de uma reprovação
 genérica sem explicação. Ver `assessFaceQuality` em `face-match-pipeline.ts`.
@@ -246,13 +246,12 @@ pytest para os testes.
   do desafio de vivacidade.
 - [`test_threshold_calibration.py`](./test_threshold_calibration.py),
   [`test_geofence_calibration.py`](./test_geofence_calibration.py) — 18
-  testes pytest cobrindo a calibração estatística, **rodados e verificados
-  neste repositório**.
+  testes pytest cobrindo a calibração estatística.
 
 ## Como rodar os testes
 
 ```bash
-# Testes de calibração estatística (Python) — rodam de verdade agora:
+# Testes de calibração estatística (Python):
 pip install pytest
 pytest showcases/ponto-inteligente -v
 

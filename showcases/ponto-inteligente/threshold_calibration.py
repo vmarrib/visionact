@@ -5,12 +5,12 @@ Este arquivo responde a uma pergunta que o código do app (`face-match-client.ts
 não responde sozinho: por que o limiar de similaridade é 0.6, e não 0.5 ou 0.8?
 
 A resposta correta não é "escolhi um número que parecia razoável" — é uma
-análise estatística clássica de sistemas biométricos, feita OFFLINE (uma vez,
+análise estatística clássica de sistemas biométricos, feita offline (uma vez,
 numa fase de calibração) antes do valor virar uma constante no código que
 roda no celular do funcionário:
 
   1. Colete pares de comparação rotulados: "genuínos" (selfie × referência da
-     MESMA pessoa) e "impostores" (selfie × referência de pessoas diferentes).
+     mesma pessoa) e "impostores" (selfie × referência de pessoas diferentes).
   2. Para cada limiar candidato, calcule:
        FAR (False Accept Rate)  = % de impostores que o limiar aprovaria
        FRR (False Reject Rate)  = % de genuínos que o limiar reprovaria
@@ -19,10 +19,10 @@ roda no celular do funcionário:
   4. Escolha o limiar final não necessariamente no EER, mas no ponto que
      reflete a prioridade de negócio: para ponto eletrônico, aprovar um
      impostor (fraude) é pior do que um funcionário legítimo precisar tentar
-     de novo — então o limiar real fica um pouco ACIMA do EER, priorizando
+     de novo — então o limiar real fica um pouco acima do EER, priorizando
      FAR baixo mesmo à custa de mais FRR.
 
-Os escores de exemplo abaixo são SIMULADOS (gerados por uma distribuição
+Os escores de exemplo abaixo são simulados (gerados por uma distribuição
 conhecida, não capturados de pessoas reais) — nenhum dado biométrico real
 aparece neste repositório.
 """
@@ -35,7 +35,7 @@ from dataclasses import dataclass
 
 def false_accept_rate(threshold: float, impostor_scores: list[float]) -> float:
     """
-    Fração de comparações de PESSOAS DIFERENTES que o limiar aprovaria
+    Fração de comparações de pessoas diferentes que o limiar aprovaria
     (similaridade >= threshold). É a métrica que mais importa para
     segurança: cada ponto percentual de FAR é uma fraude potencial que o
     sistema deixaria passar.
@@ -47,7 +47,7 @@ def false_accept_rate(threshold: float, impostor_scores: list[float]) -> float:
 
 def false_reject_rate(threshold: float, genuine_scores: list[float]) -> float:
     """
-    Fração de comparações da MESMA pessoa que o limiar reprovaria
+    Fração de comparações da mesma pessoa que o limiar reprovaria
     (similaridade < threshold). É a métrica que mais importa para
     usabilidade: cada ponto percentual de FRR é um funcionário legítimo
     tendo que tentar bater o ponto de novo.
@@ -72,7 +72,7 @@ def find_equal_error_rate(
 ) -> EqualErrorPoint:
     """
     Varre limiares de 0 a 1 e retorna o ponto onde |FAR - FRR| é mínimo — o
-    Equal Error Rate. É a métrica padrão para RELATAR a qualidade de um
+    Equal Error Rate. É a métrica padrão para relatar a qualidade de um
     sistema biométrico (quanto menor o EER, melhor o sistema separa
     genuínos de impostores), mas não é necessariamente o limiar que se usa
     em produção — ver `recommend_operating_threshold`.
@@ -99,13 +99,13 @@ def recommend_operating_threshold(
     resolution: int = 200,
 ) -> EqualErrorPoint:
     """
-    Recomenda o limiar de OPERAÇÃO (o que de fato vai para o código),
+    Recomenda o limiar de operação (o que de fato vai para o código),
     priorizando FAR baixo — decisão de negócio explícita para ponto
     eletrônico: aprovar um impostor é mais caro (fraude, passivo
     trabalhista) do que um funcionário legítimo tentar de novo.
 
     Entre todos os limiares que mantêm FAR <= max_acceptable_far, escolhe o
-    MENOR (o mais permissivo possível dentro da restrição de segurança) —
+    menor (o mais permissivo possível dentro da restrição de segurança) —
     isso minimiza o FRR resultante, sem violar o teto de FAR aceitável.
     """
     candidates: list[EqualErrorPoint] = []
@@ -132,7 +132,7 @@ def generate_example_dataset(
     seed: int = 42,
 ) -> tuple[list[float], list[float]]:
     """
-    Gera um dataset SIMULADO de escores de similaridade — nenhuma foto ou
+    Gera um dataset simulado de escores de similaridade — nenhuma foto ou
     descritor facial real é usado. Modelado como duas distribuições normais
     truncadas em [0, 1], com sobreposição parcial (como acontece em
     sistemas reais: a separação nunca é perfeita).

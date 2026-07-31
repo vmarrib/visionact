@@ -1,11 +1,11 @@
 /**
- * Testes de `geolocation.ts`.
+ * Testes de `geolocation.ts` — Vitest, rodar com `bun run test` na raiz do
+ * repositório.
  *
  * `getCurrentPosition` depende da Geolocation API do navegador (não existe
  * fora de um browser real) — por isso não é testada aqui por unidade; o que
  * é testado é a lógica pura em torno dela: a decisão de confiabilidade da
- * leitura e as mensagens de erro por tipo de falha. Ver nota em
- * `pitaia/ai-context-service.test.ts` sobre rodar localmente.
+ * leitura e as mensagens de erro por tipo de falha.
  */
 
 import { describe, expect, it } from "vitest";

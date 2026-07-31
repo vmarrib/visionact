@@ -42,7 +42,7 @@ export type FaceQualityIssue =
   | "face_too_small";
 
 /**
- * Checagem de qualidade ANTES de extrair o descritor — evitar processar (e
+ * Checagem de qualidade antes de extrair o descritor — evitar processar (e
  * eventualmente comparar) uma captura ruim é mais barato do que comparar e
  * só descobrir depois que a imagem era inutilizável.
  *

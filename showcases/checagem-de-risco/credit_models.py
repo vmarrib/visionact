@@ -6,13 +6,12 @@ alimentam 4 modelos determinísticos independentes, cada um olhando para uma
 dimensão diferente de risco de crédito. O resultado combinado é a "análise
 de crédito" usada pela matriz KYC.
 
-Por que determinístico/scorecard e não um modelo treinado: não existe aqui
-uma base de inadimplência real rotulada para treinar contra (esse é um
-showcase de portfólio, não o sistema de produção) — um modelo de ML
-"treinado" sem dados de treino reais seria fabricar resultado. Um scorecard
-com pesos explícitos e documentados é o que existe de mais honesto pra
-demonstrar a mesma decisão de engenharia (como combinar múltiplos sinais de
-risco num score único) sem fingir ter dataset de treino.
+Determinístico/scorecard em vez de um modelo treinado por uma razão
+concreta: este showcase não tem uma base de inadimplência real rotulada
+para treinar contra. Um scorecard com pesos explícitos é a forma correta
+de demonstrar a decisão de engenharia central — como combinar múltiplos
+sinais de risco num score único — sem depender de um dataset de treino que
+não existe neste contexto.
 
 Convenção de score em todo o showcase: 0 = sem risco, 1 = risco máximo.
 """
@@ -24,9 +23,9 @@ from dataclasses import dataclass
 from bureau_client import BureauRecord
 
 # Nº de registros restritivos (protesto + cheque sem fundo) a partir do qual
-# o modelo de comportamento de pagamento já considera risco máximo — mesma
-# lógica de "teto de saturação" usada no antigo media_check.py: um único
-# restritivo não deveria pesar o mesmo que três.
+# o modelo de comportamento de pagamento já considera risco máximo — o
+# mesmo raciocínio de saturação usado em media_check_categories.py: um
+# único restritivo não deveria pesar o mesmo que três.
 RESTRITIVOS_TETO = 3
 
 # Meses de atividade a partir dos quais o fator de instabilidade cadastral

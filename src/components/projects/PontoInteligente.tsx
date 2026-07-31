@@ -147,8 +147,8 @@ export function PontoInteligente() {
           entre o quadro neutro e o quadro do desafio bater com o que foi pedido — uma foto
           estática não reage sob comando. O limiar de decisão usado aqui{" "}
           <strong>não é</strong> o número simulado da seção de validação estatística abaixo — é o
-          padrão real de mercado para este modelo (distância euclidiana ≤ 0.6). Explico o porquê
-          logo ali embaixo. Código em{" "}
+          padrão real de mercado para este modelo (distância euclidiana ≤ 0.6), com a justificativa
+          detalhada na seção seguinte. Código em{" "}
           <code className="rounded bg-secondary px-1 py-0.5 text-xs">src/lib/face-match-live.ts</code>{" "}
           e{" "}
           <code className="rounded bg-secondary px-1 py-0.5 text-xs">src/lib/liveness-challenge.ts</code>.
@@ -220,8 +220,7 @@ Raio para aceitar 99% das leituras legítimas: 74.3 m`}
             permissiva que a calibração simulada. Para contexto de mercado: sistemas bancários
             miram FAR de 0,001%–0,1% com modelos proprietários multi-modais (infravermelho, prova
             de vida); um descritor de 128 números rodando no navegador é classe
-            controle-de-acesso/ponto, não classe bancária — e isso é documentado aqui, não
-            escondido.
+            controle-de-acesso/ponto, não classe bancária.
           </p>
         </div>
         <div className="mt-4 rounded-md border border-neutral/30 bg-neutral/10 p-4">

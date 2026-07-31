@@ -27,11 +27,11 @@ export const projects: ProjectMeta[] = [
     slug: "checagem-de-risco",
     index: "02",
     name: "Checagem de Risco",
-    tagline: "Diligência em lote com PySpark",
+    tagline: "Due diligence em lote com PySpark: KYS, KYE e KYC",
     description:
-      "Pipeline PySpark que consulta múltiplas fontes de risco em lote (paralelizado, não uma contraparte por vez), aplica regras configuráveis — incluindo um checador de mídia adversa próprio, não um bureau — e gera um dossiê final com score e regras sinalizadas.",
+      "Pipeline PySpark que roda 3 matrizes de risco configuráveis por papel da contraparte (fornecedor, colaborador, cliente) sobre dados de bureau e checagem de mídia adversa por categoria, com 4 modelos de crédito embarcados na camada de cliente — saída em 3 DataFrames tipados, um por matriz.",
     domain: "Data Engineering · Risk & Compliance",
-    stack: ["PySpark", "Python", "YAML", "TypeScript", "Zod", "TanStack Start"],
+    stack: ["PySpark", "Python", "Pandas", "pytest"],
     accent: "Regulatory grade",
     github: "https://github.com/vmarrib/visionact/tree/main/showcases/checagem-de-risco",
   },
@@ -55,7 +55,7 @@ export const profile = {
   name: "Vanessa M. Ribeiro",
   role: "Engenheira & Cientista de Dados",
   summary:
-    "Construo sistemas de dados de ponta a ponta para domínios sensíveis do mundo real — saúde, compliance e biometria — com modelagem de acesso rigorosa (Row Level Security não-trivial) desde o design do schema. Três projetos em produção: unificação de dados de saúde com IA de contexto, due diligence B2B integrando múltiplas fontes públicas de risco, e gestão de jornada com geolocalização e visão computacional calibradas estatisticamente.",
+    "Construo sistemas de dados de ponta a ponta para domínios sensíveis do mundo real — saúde, compliance e biometria — com modelagem de acesso rigorosa (Row Level Security não-trivial) desde o design do schema. Três projetos em produção: unificação de dados de saúde com IA de contexto, due diligence B2B com matrizes de risco por papel de contraparte e modelos de crédito embarcados, e gestão de jornada com geolocalização e visão computacional calibradas estatisticamente.",
   email: "contato@visionact.org",
   phone: "+55 48 99167-4257",
   github: "https://github.com/vmarrib/visionact",

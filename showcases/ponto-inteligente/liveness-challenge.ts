@@ -2,10 +2,10 @@
  * Ponto Inteligente — amostra de prova de vivacidade (liveness) por desafio de movimento.
  *
  * Motivação real, não hipotética: testando a demo ao vivo do portfólio,
- * segurar uma FOTO estática na frente da câmera foi aprovado como "mesma
+ * segurar uma foto estática na frente da câmera foi aprovado como "mesma
  * pessoa". O pipeline de FaceMatch (`face-match-client.ts`,
- * `face-match-pipeline.ts`) confirma QUEM está na imagem, mas nunca
- * verificou SE a captura é de uma pessoa real, ao vivo — uma classe
+ * `face-match-pipeline.ts`) confirma quem está na imagem, mas nunca
+ * verificava se a captura vinha de uma pessoa real, ao vivo — uma classe
  * conhecida de vulnerabilidade em biometria facial chamada ataque de
  * apresentação (presentation attack / spoofing).
  *
@@ -16,7 +16,7 @@
  * consistente com o que foi pedido.
  *
  * Por que aleatório? Um vídeo pré-gravado da pessoa real, reproduzido
- * para a câmera, poderia coincidentemente conter QUALQUER ação fixa — mas
+ * para a câmera, poderia coincidentemente conter qualquer ação fixa — mas
  * dificilmente conterá, no momento exato pedido, a ação aleatória
  * específica escolhida por este sistema. Não é infalível (um atacante
  * determinado poderia preparar um vídeo com todas as ações e escolher a
@@ -96,7 +96,7 @@ const HEAD_TURN_DELTA_RATIO = 0.12;
  * comparação independente de o rosto estar mais perto ou mais longe da
  * câmera entre os dois quadros.
  *
- * `turn_head` verifica virar para QUALQUER lado, não um lado específico,
+ * `turn_head` verifica virar para qualquer lado, não um lado específico,
  * de propósito: exigir uma direção (esquerda/direita) dependeria de saber
  * se o vídeo exibido ao usuário está espelhado (comum em apps de câmera,
  * para parecer um espelho) — um detalhe fácil de inverter sem testar numa

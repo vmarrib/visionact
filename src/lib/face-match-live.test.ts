@@ -6,9 +6,6 @@
  * `@vladmandic/face-api`. `loadFaceMatchModels()` e `detectFace()` exigem
  * um navegador real com WebGL e uma câmera — fora do escopo de um teste
  * automatizado; a verificação delas é manual, abrindo a demo no site.
- *
- * Sintaxe Vitest — ver nota em `risk-check-cnpj.test.ts` sobre rodar
- * localmente (este ambiente de portfólio não tem Node).
  */
 
 import { describe, expect, it } from "vitest";
