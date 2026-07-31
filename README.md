@@ -21,26 +21,12 @@ Este repositório é duas coisas ao mesmo tempo:
 | Projeto | Pasta | O quê |
 |---|---|---|
 | PitaIA | [`showcases/pitaia`](./showcases/pitaia) | RLS multi-papel, RAG manual para contexto de saúde, scoring declarativo de instrumentos clínicos |
-| Checagem de Risco | [`showcases/checagem-de-risco`](./showcases/checagem-de-risco) | Pipeline PySpark de diligência em lote, checagem de mídia própria, motor de regras configurável |
+| Checagem de Risco | [`showcases/checagem-de-risco`](./showcases/checagem-de-risco) | Pipeline PySpark de diligência (KYS/KYE/KYC), 4 modelos de crédito, motor de compliance por campo, checagem de mídia por categoria de risco |
 | Ponto Inteligente | [`showcases/ponto-inteligente`](./showcases/ponto-inteligente) | Geofencing, reconhecimento facial client-side, calibração estatística de limiares (FAR/FRR/EER, percentil de GPS) |
 
 Todos os showcases Python têm testes reais rodáveis com `pytest` (sem
 depender de PySpark instalado, por design — ver os READMEs). Os testes
 TypeScript usam Vitest.
-
-## Demo ao vivo
-
-A página de **Checagem de Risco** no site tem uma demonstração funcional:
-digite um CNPJ real, e ela consulta a BrasilAPI de verdade, aplica as
-regras configuradas e mostra um dossiê completo. O código dessa demo (fora
-de `showcases/`, porque é parte do próprio app, não uma amostra estática)
-fica em:
-
-- `src/lib/risk-check-rules.ts` — regras configuradas (campo, condição, peso)
-- `src/lib/risk-check-dossier.ts` — schema da BrasilAPI e curadoria do dossiê
-- `src/lib/risk-check-cache.ts` — cache de curta duração por CNPJ
-- `src/lib/risk-check.functions.ts` — orquestração (server function)
-- `src/components/projects/RiskCheckDemo.tsx` — interface
 
 ## Rodando localmente
 
