@@ -1,4 +1,4 @@
-# Checagem de Risco — amostra de código
+# Checagem de Risco e Crédito, amostra de código
 
 > Reformulação de portfólio de um sistema de due diligence/KYC real, com o
 > nome comercial do produto omitido de propósito. O objetivo aqui não é
@@ -197,3 +197,20 @@ agregar o resultado), não um crawler de produção. A aplicação real é um
 produto web multi-tenant (não um pipeline batch); esta amostra reformula
 deliberadamente o mesmo problema sob uma ótica de engenharia de dados em
 lote, para fins de portfólio.
+
+## Camada de fontes (REST + MCP) e carga no ERP/CRM
+
+- [`data_sources.py`](./data_sources.py) — protocolo `RiskDataSource` com
+  duas implementações: `RestBureauSource` (bureau HTTP/JSON) e
+  `McpToolSource` (provedor exposto como servidor MCP, via `tools/call`
+  com o `Accept: application/json, text/event-stream` exigido pelo
+  Streamable HTTP). `merge_records()` combina respostas parciais com
+  precedência declarada pela ordem das fontes e guarda a procedência de
+  cada campo, para a decisão continuar auditável. Fonte que falha não
+  derruba a análise. Transporte injetável: testável sem rede.
+- [`erp_crm_load.py`](./erp_crm_load.py) — o "L" do ETL. Projeta o
+  resultado num contrato fixo de atributos de ERP/CRM
+  (`risco_status`, `risco_faixa`, `risco_score_credito`...), calcula um
+  `payload_hash` do conteúdo de negócio (sem o timestamp) para upsert
+  idempotente, e agrega a carteira em métricas de compliance prontas para
+  dashboard.
