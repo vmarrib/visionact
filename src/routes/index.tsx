@@ -9,13 +9,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Vision Act — portfólio de Vanessa Ribeiro: engenharia de dados aplicada a domínios sensíveis do mundo real — saúde, compliance e biometria. Três projetos em produção, de ponta a ponta.",
+          "Vision Act, portfólio de Vanessa Ribeiro: engenharia de dados aplicada a domínios sensíveis do mundo real, saúde, compliance e biometria. Três projetos em produção, de ponta a ponta.",
       },
       { property: "og:title", content: "Vision Act, por Vanessa Ribeiro" },
       {
         property: "og:description",
         content:
-          "Engenharia de dados aplicada a saúde, compliance e biometria — três projetos em produção, de ponta a ponta.",
+          "Engenharia de dados aplicada a saúde, compliance e biometria, três projetos em produção, de ponta a ponta.",
       },
     ],
   }),
