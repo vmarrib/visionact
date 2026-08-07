@@ -30,7 +30,7 @@ export function PontoInteligente() {
         name={meta.name}
         tagline={meta.tagline}
         domain={meta.domain}
-        problem="Construído para uma indústria de alimentos com vendedores e trabalhadores externos, em múltiplos locais e turnos. A exigência era dupla: uma prova de presença que resistisse a uma disputa trabalhista (digital falha com trabalho manual, crachá pode ser emprestado, papel não resiste) e geolocalização confiável para quem trabalha fora da planta, não só dentro dela. O sistema confirma, na mesma batida, que a pessoa está fisicamente no local certo e que é ela mesma — cada tentativa, aprovada ou não, registrada e armazenada de forma segura."
+        problem="Construído para uma indústria de alimentos com vendedores e trabalhadores externos, em múltiplos locais e turnos. A exigência era dupla: uma prova de presença que resistisse a uma disputa trabalhista (digital falha com trabalho manual, crachá pode ser emprestado, papel não resiste) e geolocalização confiável para quem trabalha fora da planta, não só dentro dela. O sistema confirma, na mesma batida, que a pessoa está fisicamente no local certo e que é ela mesma, cada tentativa, aprovada ou não, registrada e armazenada de forma segura."
         stack={meta.stack}
         github={meta.github}
       />
@@ -38,7 +38,7 @@ export function PontoInteligente() {
       <Section label="Planejamento de produto" title="Da descoberta em chão de fábrica ao MVP">
         <p className="mb-4 text-muted-foreground">
           O trabalho começou antes de qualquer linha de código, acompanhando um turno completo
-          numa planta para entender onde o processo de ponto até então falhava — digitais
+          numa planta para entender onde o processo de ponto até então falhava, digitais
           desgastadas por trabalho manual, filas na catraca no início do turno, e colegas batendo
           ponto uns pelos outros.
         </p>
@@ -88,7 +88,7 @@ export function PontoInteligente() {
 
       <Section label="Visão computacional" title="Reconhecimento facial embarcado, em 3 estágios">
         <p className="mb-4 text-muted-foreground">
-          Todo o pipeline roda no navegador do funcionário — nenhuma imagem biométrica sai do
+          Todo o pipeline roda no navegador do funcionário, nenhuma imagem biométrica sai do
           dispositivo até a decisão já estar tomada.
         </p>
         <div className="mb-6 overflow-x-auto rounded-lg border border-border">
@@ -115,7 +115,7 @@ export function PontoInteligente() {
         </div>
 
         <p className="mb-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          Custo — cenário de referência (~20 colaboradores, ~80 batidas/dia)
+          Custo: cenário de referência (~20 colaboradores, ~80 batidas/dia)
         </p>
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-left text-sm">
@@ -141,12 +141,12 @@ export function PontoInteligente() {
 
       <Section label="Demo" title="Experimente o pipeline acima, ao vivo">
         <p className="mb-4 text-muted-foreground">
-          Envie uma foto de referência e tire outra pela câmera — os mesmos 3 modelos da tabela
+          Envie uma foto de referência e tire outra pela câmera, os mesmos 3 modelos da tabela
           acima rodam de verdade no seu navegador. Antes de aceitar a captura, o sistema pede uma
           ação aleatória (sorrir, abrir a boca, virar o rosto) e só segue adiante se a mudança
-          entre o quadro neutro e o quadro do desafio bater com o que foi pedido — uma foto
+          entre o quadro neutro e o quadro do desafio bater com o que foi pedido, uma foto
           estática não reage sob comando. O limiar de decisão usado aqui{" "}
-          <strong>não é</strong> o número simulado da seção de validação estatística abaixo — é o
+          <strong>não é</strong> o número simulado da seção de validação estatística abaixo, é o
           padrão real de mercado para este modelo (distância euclidiana ≤ 0.6), com a justificativa
           detalhada na seção seguinte. Código em{" "}
           <code className="rounded bg-secondary px-1 py-0.5 text-xs">src/lib/face-match-live.ts</code>{" "}
@@ -171,7 +171,7 @@ export function PontoInteligente() {
                 <>
                   <p className="mb-2">
                     Para cada limiar candidato: FAR (fração de impostores aprovados) e FRR (fração
-                    de genuínos reprovados). O EER é onde as duas se cruzam — métrica padrão de
+                    de genuínos reprovados). O EER é onde as duas se cruzam, métrica padrão de
                     sistemas biométricos.
                   </p>
                 </>
@@ -211,12 +211,12 @@ Raio para aceitar 99% das leituras legítimas: 74.3 m`}
           </p>
           <p className="text-sm text-foreground">
             A calibração acima roda sobre uma distribuição <strong>simulada</strong>, criada só
-            para ensinar o método FAR/FRR/EER de forma abstrata — nunca foi uma medição real do{" "}
+            para ensinar o método FAR/FRR/EER de forma abstrata, nunca foi uma medição real do{" "}
             <code className="text-xs">@vladmandic/face-api</code>. A demo ao vivo inicialmente
             reaproveitou o número que saiu dali (0.65), e isso causou falsos negativos reais: a
             mesma pessoa sendo reprovada com similaridade ~0.50. O limiar em produção foi
             corrigido para <strong>0.4</strong> (distância euclidiana ≤ 0.6), a referência real
-            adotada pela comunidade dlib/face-api.js para descritores de 128 dimensões — bem mais
+            adotada pela comunidade dlib/face-api.js para descritores de 128 dimensões, bem mais
             permissiva que a calibração simulada. Para contexto de mercado: sistemas bancários
             miram FAR de 0,001%–0,1% com modelos proprietários multi-modais (infravermelho, prova
             de vida); um descritor de 128 números rodando no navegador é classe
@@ -229,11 +229,11 @@ Raio para aceitar 99% das leituras legítimas: 74.3 m`}
           </p>
           <p className="text-sm text-foreground">
             Um segundo teste real expôs outra lacuna: segurar uma <strong>foto estática</strong> em
-            frente à câmera também era aprovada como "mesma pessoa" — o FaceMatch confirma quem
+            frente à câmera também era aprovada como "mesma pessoa", o FaceMatch confirma quem
             está na imagem, mas nunca verificava se a captura vinha de uma pessoa viva. É uma
             vulnerabilidade conhecida em biometria facial (ataque de apresentação). A contramedida
             foi um desafio de movimento aleatório: sorrir, abrir a boca ou virar o rosto, escolhido
-            na hora, comparando um quadro neutro com um quadro depois do desafio — uma foto ou um
+            na hora, comparando um quadro neutro com um quadro depois do desafio, uma foto ou um
             vídeo em loop não reage sob comando aleatório. Não é infalível (um vídeo preparado com
             todas as reações poderia, em teoria, ser sincronizado), mas eleva o custo do ataque bem
             além de "segurar uma foto", que é o vetor mais barato e mais comum.
@@ -265,7 +265,7 @@ Raio para aceitar 99% das leituras legítimas: 74.3 m`}
               body: (
                 <p>
                   Antes de aceitar a captura, um desafio de movimento aleatório (sorrir, abrir a
-                  boca, virar o rosto) confirma que é uma pessoa real ao vivo — contramedida a foto
+                  boca, virar o rosto) confirma que é uma pessoa real ao vivo, contramedida a foto
                   ou vídeo estático, adicionada depois de um teste real expor essa brecha.
                 </p>
               ),
@@ -298,7 +298,7 @@ Raio para aceitar 99% das leituras legítimas: 74.3 m`}
               title: "Vínculo de dispositivo",
               body: (
                 <p>
-                  Um fingerprint do dispositivo é salvo e associado ao usuário no onboarding —
+                  Um fingerprint do dispositivo é salvo e associado ao usuário no onboarding , 
                   dificulta um funcionário bater ponto de um aparelho que não é o seu.
                 </p>
               ),
@@ -317,7 +317,7 @@ Raio para aceitar 99% das leituras legítimas: 74.3 m`}
             "Supabase (RLS)",
             "Registro auditado",
           ]}
-          caption="Os dois limiares (raio e similaridade) vêm de calibração estatística, não de um valor arbitrário — e ficam numa tabela de configuração, ajustáveis sem novo deploy."
+          caption="Os dois limiares (raio e similaridade) vêm de calibração estatística, não de um valor arbitrário, e ficam numa tabela de configuração, ajustáveis sem novo deploy."
         />
         <div className="mt-6">
           <p className="mb-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">

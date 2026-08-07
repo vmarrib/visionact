@@ -110,12 +110,12 @@ export function FaceMatchDemo() {
   }
 
   /**
-   * Prova de vivacidade por desafio de movimento — motivada por um teste
+   * Prova de vivacidade por desafio de movimento, motivada por um teste
    * real desta demo em que uma FOTO estática, aproximada da câmera, foi
    * aprovada como "mesma pessoa". Detecta um quadro-base (neutro), pede uma
    * ação aleatória (sorrir, abrir a boca, virar o rosto), captura um
    * segundo quadro e só aceita a captura se a mudança observada bater com
-   * o que foi pedido — uma foto ou um vídeo em loop não reage sob comando.
+   * o que foi pedido, uma foto ou um vídeo em loop não reage sob comando.
    */
   async function handleVerifyAndCapture() {
     const video = videoRef.current;
@@ -217,10 +217,10 @@ export function FaceMatchDemo() {
       {phase === "idle" && (
         <div className="rounded-lg border border-border bg-surface p-4">
           <p className="text-sm text-muted-foreground">
-            Envie uma foto de referência e tire outra pela câmera — o mesmo pipeline de 3 estágios
+            Envie uma foto de referência e tire outra pela câmera, o mesmo pipeline de 3 estágios
             (detecção → landmarks → descritor) documentado no showcase roda aqui de verdade, 100%
             no seu navegador. A captura ao vivo passa por um desafio de vivacidade (sorrir, abrir a
-            boca ou virar o rosto, escolhido ao acaso) antes de ser aceita — uma foto estática não
+            boca ou virar o rosto, escolhido ao acaso) antes de ser aceita, uma foto estática não
             reage sob comando. Nenhuma imagem é enviada a um servidor. Isso baixa ~7 MB de modelos
             na primeira vez.
           </p>
@@ -374,17 +374,17 @@ export function FaceMatchDemo() {
               <span
                 className={`font-mono text-sm font-semibold ${result.approved ? "text-positive" : "text-negative"}`}
               >
-                {result.approved ? "Aprovado — mesma pessoa" : "Reprovado — pessoas diferentes"}
+                {result.approved ? "Aprovado: mesma pessoa" : "Reprovado: pessoas diferentes"}
               </span>
               <span className="font-mono text-xs text-muted-foreground">
                 similaridade = <span className="font-semibold text-foreground">{result.similarity.toFixed(3)}</span>{" "}
-                (limiar: 0.400 — distância euclidiana ≤ 0.6, padrão dlib/face-api.js)
+                (limiar: 0.400, distância euclidiana ≤ 0.6, padrão dlib/face-api.js)
               </span>
             </div>
           )}
 
           <p className="text-xs text-muted-foreground">
-            Processamento 100% local — nenhuma foto ou descritor facial sai do seu navegador.
+            Processamento 100% local, nenhuma foto ou descritor facial sai do seu navegador.
           </p>
         </div>
       )}

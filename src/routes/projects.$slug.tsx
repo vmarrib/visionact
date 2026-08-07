@@ -21,7 +21,7 @@ export const Route = createFileRoute("/projects/$slug")({
   head: ({ loaderData }) => {
     const p = loaderData?.project;
     if (!p) return {};
-    const title = `${p.name} — ${profile.siteName}`;
+    const title = `${p.name} | ${profile.siteName}`;
     return {
       meta: [
         { title },

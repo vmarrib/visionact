@@ -17,7 +17,7 @@ export const projects: ProjectMeta[] = [
     name: "PitaIA",
     tagline: "Inteligência pessoal de saúde com IA",
     description:
-      "Unifica check-ins de humor, sono, treino, nutrição, ciclo menstrual e exames num histórico único, e usa IA com contexto real do usuário para gerar insights — com RLS multi-papel isolando dados íntimos mesmo de profissionais autorizados.",
+      "Unifica check-ins de humor, sono, treino, nutrição, ciclo menstrual e exames num histórico único, e usa IA com contexto real do usuário para gerar insights, com RLS multi-papel isolando dados íntimos mesmo de profissionais autorizados.",
     domain: "Data Engineering · Applied AI",
     stack: ["React", "Supabase", "PostgreSQL", "Row Level Security", "Edge Functions", "Claude API"],
     accent: "Health data platform",
@@ -26,13 +26,14 @@ export const projects: ProjectMeta[] = [
   {
     slug: "checagem-de-risco",
     index: "02",
-    name: "Checagem de Risco",
-    tagline: "Due diligence em lote com PySpark: KYS, KYE e KYC",
+    name: "Checagem de Risco e Crédito",
+    tagline: "ETL de métricas de compliance e crédito para dentro do ERP e do CRM",
     description:
-      "Pipeline PySpark que roda 3 regras de análise de risco configuráveis por papel da contraparte (fornecedor, colaborador, cliente) sobre dados de bureau e checagem de mídia adversa por categoria, com 4 modelos de crédito embarcados na camada de cliente — saída em 3 DataFrames tipados, um por conjunto de regras.",
+      "Pipeline PySpark que consolida dados de bureaus via API REST e de servidores MCP, aplica regras de compliance por campo (KYS, KYE, KYC) com 4 modelos de crédito embarcados, e carrega o resultado como atributos de risco no ERP ou CRM: upsert idempotente por hash, procedência por campo e métricas de carteira prontas para o comitê.",
     domain: "Data Engineering · Risk & Compliance",
-    stack: ["PySpark", "Python", "Pandas", "pytest"],
+    stack: ["PySpark", "Python", "Pandas", "MCP", "REST", "pytest"],
     accent: "Regulatory grade",
+
     github: "https://github.com/vmarrib/visionact/tree/main/showcases/checagem-de-risco",
   },
   {
@@ -55,7 +56,7 @@ export const profile = {
   name: "Vanessa M. Ribeiro",
   role: "Engenheira & Cientista de Dados",
   summary:
-    "Construo sistemas de dados de ponta a ponta para domínios sensíveis do mundo real — saúde, compliance e biometria — com modelagem de acesso rigorosa (Row Level Security não-trivial) desde o design do schema. Três projetos em produção: unificação de dados de saúde com IA de contexto, due diligence B2B com regras de análise de risco por papel de contraparte e modelos de crédito embarcados, e gestão de jornada com geolocalização e visão computacional calibradas estatisticamente.",
+    "Construo sistemas de dados de ponta a ponta para domínios sensíveis do mundo real, saúde, compliance e biometria, com modelagem de acesso rigorosa (Row Level Security não-trivial) desde o design do schema. Três projetos em produção: unificação de dados de saúde com IA de contexto, due diligence B2B com regras de análise de risco por papel de contraparte e modelos de crédito embarcados, e gestão de jornada com geolocalização e visão computacional calibradas estatisticamente.",
   email: "contato@visionact.org",
   phone: "+55 48 99167-4257",
   github: "https://github.com/vmarrib/visionact",
