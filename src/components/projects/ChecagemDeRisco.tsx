@@ -16,18 +16,20 @@ export function ChecagemDeRisco() {
         name={meta.name}
         tagline={meta.tagline}
         domain={meta.domain}
-        problem="Quem decide sobre uma contraparte é o time de compras, de crédito ou o comercial, e esse time trabalha dentro do ERP e do CRM, não dentro de uma ferramenta de compliance. O dado de risco, porém, vive fora: bureaus por API REST, provedores expostos como servidores MCP, checagem de reputação em mídia sem fonte estruturada. Este pipeline é o ETL que fecha esse vão: extrai das fontes, aplica regras de compliance e modelos de crédito, e carrega o resultado como atributos de risco no cadastro que o negócio já usa, para uma carteira inteira de uma vez."
+        problem="Quem aprova ou bloqueia uma contraparte é o time de compras, crédito ou comercial. Esse time não trabalha dentro de uma ferramenta de compliance; trabalha dentro do ERP e do CRM. O dado de risco, porém, vive fora: bureaus por API REST, provedores expostos como servidores MCP, e checagem de reputação em mídia sem fonte estruturada. Este pipeline é o ETL que fecha esse vão: extrai das fontes, aplica regras de compliance e modelos de crédito, e carrega o resultado como atributos de risco no cadastro que o negócio já usa, para uma carteira inteira de uma vez."
         stack={meta.stack}
         github={meta.github}
       />
 
-      <Section label="Posicionamento" title="Um ETL de risco, não um relatório de compliance">
+      <Section label="Posicionamento" title="Análise que chega onde o analista trabalha">
         <p className="text-muted-foreground">
-          A saída não é um PDF que alguém precisa abrir. É um conjunto de atributos tipados
-          (situação, faixa de risco, score de crédito, regras sinalizadas) gravado por upsert no
-          cadastro do fornecedor no ERP ou na conta do cliente no CRM. Um vendedor vê{" "}
-          <code className="text-xs">BLOQUEADO</code> na tela em que ele já estava, sem trocar de
-          sistema e sem pedir uma análise por e-mail.
+          A saída não é um PDF que alguém precisa abrir. O pipeline grava atributos tipados
+          (situação, faixa de risco, score de crédito, regras sinalizadas) diretamente no cadastro
+          do fornecedor no ERP ou da conta do cliente no CRM. O analista vê{" "}
+          <code className="text-xs">BLOQUEADO</code>,{" "}
+          <code className="text-xs">EM_ANÁLISE</code> ou{" "}
+          <code className="text-xs">LIBERADO</code> na mesma tela de sempre, sem trocar de sistema e
+          sem pedir parecer por e-mail.
         </p>
         <div className="mt-6">
           <FeatureCards
