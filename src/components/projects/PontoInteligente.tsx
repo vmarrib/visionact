@@ -35,12 +35,15 @@ export function PontoInteligente() {
         github={meta.github}
       />
 
-      <Section label="Planejamento de produto" title="Da descoberta em chão de fábrica ao MVP">
+      <Section label="Planejamento de produto" title="Entendendo a necessidade do cliente">
         <p className="mb-4 text-muted-foreground">
-          O trabalho começou antes de qualquer linha de código, acompanhando um turno completo
-          numa planta para entender onde o processo de ponto até então falhava, digitais
-          desgastadas por trabalho manual, filas na catraca no início do turno, e colegas batendo
-          ponto uns pelos outros.
+          O trabalho começou a partir de um relato simples: funcionários externos saem todo dia com
+          recursos da empresa, veículos, combustível, ferramentas, e não havia como saber se estavam
+          de fato em jornada. Sem um registro de presença vinculado a localização, o controle ficava
+          dependente de declaração, e a empresa não conseguia provar, em uma disputa, onde o
+          colaborador estava no horário da batida. Foi a partir daí que desenhamos o MVP:
+          geolocalização mais reconhecimento facial, sem crachá, senha ou digital, para garantir que
+          a pessoa certa está no lugar certo.
         </p>
         <FeatureCards
           features={[
@@ -298,8 +301,8 @@ Raio para aceitar 99% das leituras legítimas: 74.3 m`}
               title: "Vínculo de dispositivo",
               body: (
                 <p>
-                  Um fingerprint do dispositivo é salvo e associado ao usuário no onboarding , 
-                  dificulta um funcionário bater ponto de um aparelho que não é o seu.
+                  Um fingerprint do dispositivo é salvo e associado ao usuário no onboarding,
+                  dificultando um funcionário bater ponto de um aparelho que não é o seu.
                 </p>
               ),
             },
